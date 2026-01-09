@@ -2,3 +2,4 @@
 Project repository of the group 116 o MLOPS
 
 Hola pau
+arman sergi
