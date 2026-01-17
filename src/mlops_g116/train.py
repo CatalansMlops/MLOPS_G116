@@ -104,6 +104,10 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
     # Save figure in reports folder
     fig.savefig("reports/figures/training_statistics.png")
 
+def main() -> None:
+    # Expose the train function as a CLI using Typer
+    typer.run(train)
+
 if __name__ == "__main__":
     # Expose the train function as a CLI using Typer
     typer.run(train)

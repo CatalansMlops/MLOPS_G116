@@ -7,6 +7,8 @@ name = "mlops_g116"
 version = "0.0.1"
 description = "Git repo of the project of the course Machine Learning Operations"
 authors = [
+  { name = "s254311", email = "sergi.luponsantacana@gmail.com" },
+  { name = "s253749", email = "armandgatiusugalde@gmail.com" },
   { name = "dtu_g116", email = "your@email.com" },
 ]
 
@@ -18,6 +20,9 @@ classifiers = [
 readme = "README.md"
 requires-python = ">=3.12"
 dynamic = ["dependencies", "optional-dependencies"]
+
+[project.scripts]
+train = "project_test.train:main"
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
