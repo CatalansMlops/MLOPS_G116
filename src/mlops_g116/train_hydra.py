@@ -37,6 +37,7 @@ def train(config) -> None:
     print("Training day and night")
     print(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
     hparams = config.hyperparameters
+    torch.manual_seed(hparams.seed)
 
     # Initialize model and move it to the selected device (GPU/CPU)
     model = TumorDetectionModel().to(DEVICE)
@@ -53,7 +54,7 @@ def train(config) -> None:
     loss_fn = torch.nn.CrossEntropyLoss()
 
     # Adam optimizer updates model parameters using gradients
-    optimizer = torch.optim.Adam(model.parameters(), lr=hparams.lr)
+    optimizer = instantiate(config.optimizer, params=model.parameters())
 
     # Store statistics for visualization later
     statistics = {"train_loss": [], "train_accuracy": []}
