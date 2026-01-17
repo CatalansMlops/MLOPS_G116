@@ -13,4 +13,9 @@ COPY pyproject.toml pyproject.toml
 RUN pip install -r requirements.txt --no-cache-dir --verbose
 RUN pip install . --no-deps --no-cache-dir --verbose
 
-ENTRYPOINT ["uvicorn", "src.mlops_g116.api:app", "--host", "0.0.0.0", "--port", "8000"]
+# Optional: Document that we listen on a variable port
+EXPOSE 8080
+
+# Use exec to enable variable expansion AND graceful shutdowns
+# We use ${PORT:-8080} which means: "Use $PORT if it exists, otherwise default to 8080"
+CMD exec uvicorn src.mlops_g116.api:app --host 0.0.0.0 --port ${PORT:-8080}
