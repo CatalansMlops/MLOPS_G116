@@ -1,5 +1,6 @@
 import torch
 from torch import nn
+import torchvision.models as models
 
 
 class TumorDetectionModel(nn.Module):
@@ -24,6 +25,26 @@ class TumorDetectionModel(nn.Module):
         x = torch.flatten(x, 1)
         x = self.dropout(x)
         return self.fc1(x)
+    
+
+class ResNet18(nn.Module):
+    """ResNet18 adapted for grayscale images using pre-trained weights."""
+
+    def __init__(self, num_classes: int = 10) -> None:
+        super().__init__()
+        
+        # Load ResNet18 with pre-trained ImageNet weights
+        self.backbone = models.resnet18(weights="DEFAULT")
+        
+        # Adapt first layer for 1-channel input (grayscale) instead of 3 (RGB).
+        # Note: This resets weights for this specific layer.
+        self.backbone.conv1 = nn.Conv2d(1, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        
+        # Replace the final fully connected layer to match the target number of classes.
+        self.backbone.fc = nn.Linear(self.backbone.fc.in_features, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.backbone(x)
 
 
 if __name__ == "__main__":
