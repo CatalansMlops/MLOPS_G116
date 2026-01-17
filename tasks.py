@@ -111,3 +111,6 @@ def pull_data(ctx):
 @task(pull_data)
 def train(ctx):
     ctx.run("my_cli train")
+
+## Create task to process git (add, commit, push del main y meva branca)
+## Tambe crear tasca per pull cloud

@@ -9,7 +9,7 @@ description = "Git repo of the project of the course Machine Learning Operations
 authors = [
   { name = "s254311", email = "sergi.luponsantacana@gmail.com" },
   { name = "s253749", email = "armandgatiusugalde@gmail.com" },
-  { name = "dtu_g116", email = "your@email.com" },
+  { name = "s253742", email = "s253742@dtu.dk" },
 ]
 
 keywords = ["machine learning", "MLOps"]

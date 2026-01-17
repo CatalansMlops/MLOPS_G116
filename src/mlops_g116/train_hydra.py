@@ -1,13 +1,16 @@
+import cProfile
+import subprocess
+import sys
+from pathlib import Path
+
+import hydra
 import matplotlib.pyplot as plt
 import torch
-import typer
-import os
-import hydra
 
-from mlops_g116.data import load_data
-from mlops_g116.model import TumorDetectionModel
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
+from mlops_g116.data import load_data
+from mlops_g116.model import TumorDetectionModel
 
 # Select the best available device:
 # - CUDA if an NVIDIA GPU is available
@@ -38,6 +41,14 @@ def train(config) -> None:
     print("Training day and night")
     print(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
     torch.manual_seed(hparams.seed)
+    output_dir = Path(HydraConfig.get().runtime.output_dir)
+    model_dir = output_dir / "models"
+    figure_dir = output_dir / "reports" / "figures"
+    model_dir.mkdir(parents=True, exist_ok=True)
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    profile_path = output_dir / "profile.prof"
+    profiler = cProfile.Profile()
+    profiler.enable()
 
     # Initialize model and move it to the selected device (GPU/CPU)
     model = TumorDetectionModel().to(DEVICE)
@@ -98,7 +109,7 @@ def train(config) -> None:
     print("Training complete")
 
     # Save trained model parameters to disk
-    torch.save(model.state_dict(), "models/model.pth")
+    torch.save(model.state_dict(), model_dir / "model.pth")
 
     # Plot training loss and accuracy
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
@@ -108,12 +119,16 @@ def train(config) -> None:
     axs[1].set_title("Train accuracy")
 
     # Save figure in reports folder
-    fig.savefig("reports/figures/training_statistics.png")
+    fig.savefig(figure_dir / "training_statistics.png")
+    profiler.disable()
+    profiler.dump_stats(profile_path)
+    subprocess.run([sys.executable, "-m", "snakeviz", str(profile_path)], check=False)
 
 def main() -> None:
-    # Expose the train function as a CLI using Typer
+    """Run the Hydra training entrypoint."""
     train()
 
 if __name__ == "__main__":
-    # Expose the train function as a CLI using Typer
     train()
+
+## Seguir con profiling Pytorch
