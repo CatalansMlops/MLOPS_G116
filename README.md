@@ -41,6 +41,9 @@ The directory structure of the project looks like this:
 ├── data/                     # Data directory
 │   ├── processed
 │   └── raw
+|       └── brain_dataset     # Brain Tumor MRI Dataset
+|           └── Training
+|           └── Testing           
 ├── dockerfiles/              # Dockerfiles
 │   ├── api.Dockerfile
 │   └── train.Dockerfile
