@@ -69,4 +69,4 @@ def load_data():
     return train_set, test_set
 
 if __name__ == "__main__":
-    typer.run(preprocess())
+    typer.run(preprocess)
