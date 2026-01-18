@@ -8,7 +8,7 @@ def root():
     """ Health check."""
     response = {
         "message": HTTPStatus.OK.phrase,
-        "status-code": HTTPStatus.OK,
+        "status-code": HTTPStatus.OK
     }
     return response
 
@@ -24,4 +24,9 @@ def read_item(item_id: ItemEnum):
 
 @app.get("/query_items")
 def read_item(item_id: int):
+    return {"item_id": item_id}
+
+@app.get("/items/{item_id}")
+def read_item(item_id: int):
+    """Get an item by id."""
     return {"item_id": item_id}

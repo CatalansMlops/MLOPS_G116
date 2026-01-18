@@ -10,4 +10,5 @@ matplotlib>=3.10.0
 # loguru==0.7.3
 # wandb==0.24.0
 requests==2.32.5
-
+httpx=0.28.1
+locust=2.43.1
