@@ -110,4 +110,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     # Expose the train function as a CLI using Typer
-    typer.run(train)
+    main()

@@ -1,3 +1,5 @@
+## Explicar en README.md motivo de este archivo
+
 import matplotlib.pyplot as plt
 import torch
 import typer

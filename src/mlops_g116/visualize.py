@@ -47,4 +47,4 @@ def main() -> None:
     typer.run(visualize)
 
 if __name__ == "__main__":
-    typer.run(visualize)
+    main()

@@ -1,11 +1,19 @@
 import cProfile
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 import hydra
+from loguru import logger
 import matplotlib.pyplot as plt
+from sklearn.metrics import RocCurveDisplay, accuracy_score, f1_score, precision_score, recall_score
 import torch
+import wandb
+try:
+    from dotenv import load_dotenv
+except ModuleNotFoundError:
+    load_dotenv = None
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
@@ -38,17 +46,49 @@ def train(config) -> None:
                           and stores training loss and accuracy plots.
     '''
     hparams = config.hyperparameters
-    print("Training day and night")
-    print(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
+    dotenv_available = load_dotenv is not None
+    if dotenv_available:
+        load_dotenv()
     torch.manual_seed(hparams.seed)
     output_dir = Path(HydraConfig.get().runtime.output_dir)
+    logger.remove()
+    logger.add(sys.stderr, level="INFO")
+    logger.add(output_dir / "train.log", level="INFO")
+    logger.info("Training day and night")
+    logger.info(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
+    if not dotenv_available:
+        logger.warning("python-dotenv is not installed; .env files will not be loaded.")
+    wandb_dir = output_dir / "wandb"
+    wandb_dir.mkdir(parents=True, exist_ok=True)
+    wandb_project = os.getenv("WANDB_PROJECT", "mlops_g116")
+    wandb_entity = os.getenv("WANDB_ENTITY")
+    wandb_mode = os.getenv("WANDB_MODE")
+    wandb_kwargs = {
+        "project": wandb_project,
+        "job_type": "train",
+        "config": {
+            "lr": hparams.lr,
+            "batch_size": hparams.batch_size,
+            "epochs": hparams.epochs,
+            "seed": hparams.seed,
+        },
+        "dir": str(wandb_dir),
+    }
+    if wandb_entity:
+        wandb_kwargs["entity"] = wandb_entity
+    if wandb_mode:
+        wandb_kwargs["mode"] = wandb_mode
+    wandb_run = wandb.init(**wandb_kwargs)
     model_dir = output_dir / "models"
     figure_dir = output_dir / "reports" / "figures"
+    trace_dir = output_dir / "profiler"
     model_dir.mkdir(parents=True, exist_ok=True)
     figure_dir.mkdir(parents=True, exist_ok=True)
+    trace_dir.mkdir(parents=True, exist_ok=True)
     profile_path = output_dir / "profile.prof"
     profiler = cProfile.Profile()
     profiler.enable()
+    logger.info(f"Run outputs saved under: {output_dir}")
 
     # Initialize model and move it to the selected device (GPU/CPU)
     model = TumorDetectionModel().to(DEVICE)
@@ -70,46 +110,111 @@ def train(config) -> None:
     # Store statistics for visualization later
     statistics = {"train_loss": [], "train_accuracy": []}
 
+    final_preds = None
+    final_targets = None
+
     for epoch in range(hparams.epochs):
-        model.train()  # Enables training mode (important for layers like dropout)
+        preds = []
+        targets = []
+        model.train()
+        with torch.profiler.profile(
+            activities=[torch.profiler.ProfilerActivity.CPU],
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,
+            on_trace_ready=torch.profiler.tensorboard_trace_handler(str(trace_dir)),
+        ) as prof:
+            for i, (img, target) in enumerate(train_dataloader):
+                img, target = img.to(DEVICE), target.to(DEVICE)
 
-        for i, (img, target) in enumerate(train_dataloader):
-            # img shape: (B, 1, 28, 28)
-            # target shape: (B,)
-            img, target = img.to(DEVICE), target.to(DEVICE)
+                optimizer.zero_grad()
 
-            optimizer.zero_grad()
+                y_pred = model(img)
 
-            # Forward pass
-            # y_pred shape: (B, 10)
-            y_pred = model(img)
+                with torch.profiler.record_function("model_loss"):
+                    loss = loss_fn(y_pred, target)
 
-            # Compute loss comparing predictions with ground truth labels
-            loss = loss_fn(y_pred, target)
+                with torch.profiler.record_function("backward"):
+                    loss.backward()
+                    optimizer.step()
 
-            # Backpropagation
-            loss.backward()
-            optimizer.step()
+                statistics["train_loss"].append(loss.item())
 
-            # Store loss value
-            statistics["train_loss"].append(loss.item())
+                accuracy = (
+                    (y_pred.argmax(dim=1) == target)
+                    .float()
+                    .mean()
+                    .item()
+                )
+                statistics["train_accuracy"].append(accuracy)
+                wandb.log({"train_loss": loss.item(), "train_accuracy": accuracy})
 
-            # Compute accuracy for this batch
-            accuracy = (
-                (y_pred.argmax(dim=1) == target)
-                .float()
-                .mean()
-                .item()
-            )
-            statistics["train_accuracy"].append(accuracy)
+                preds.append(y_pred.detach().cpu())
+                targets.append(target.detach().cpu())
 
-            if i % 100 == 0:
-                print(f"Epoch {epoch}, iter {i}, loss: {loss.item()}")
+                if i % 100 == 0:
+                    logger.info(f"Epoch {epoch}, iter {i}, loss: {loss.item()}")
+                    images = [
+                        wandb.Image(im.detach().cpu(), caption=f"Input {j}") for j, im in enumerate(img[:5])
+                    ]
+                    wandb.log({"images": images})
 
-    print("Training complete")
+                    grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
+                    wandb.log({"gradients": wandb.Histogram(grads)})
+
+                prof.step()
+
+        preds_tensor = torch.cat(preds, 0)
+        targets_tensor = torch.cat(targets, 0)
+        num_classes = preds_tensor.shape[1]
+        for class_id in range(num_classes):
+            if (targets_tensor == class_id).any():
+                one_hot = torch.zeros_like(targets_tensor)
+                one_hot[targets_tensor == class_id] = 1
+                _ = RocCurveDisplay.from_predictions(
+                    one_hot.numpy(),
+                    preds_tensor[:, class_id].numpy(),
+                    name=f"ROC curve for {class_id}",
+                    plot_chance_level=(class_id == 2),
+                )
+
+        fig = plt.gcf()
+        wandb.log({"roc": wandb.Image(fig)})
+        plt.close(fig)
+        final_preds = preds_tensor
+        final_targets = targets_tensor
+
+    logger.info("Training complete")
 
     # Save trained model parameters to disk
     torch.save(model.state_dict(), model_dir / "model.pth")
+    if final_preds is not None and final_targets is not None:
+        final_pred_labels = final_preds.argmax(dim=1)
+        final_accuracy = accuracy_score(final_targets.numpy(), final_pred_labels.numpy())
+        final_precision = precision_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
+        final_recall = recall_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
+        final_f1 = f1_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
+        wandb.log(
+            {
+                "final_accuracy": final_accuracy,
+                "final_precision": final_precision,
+                "final_recall": final_recall,
+                "final_f1": final_f1,
+            }
+        )
+        artifact = wandb.Artifact(
+            name="mlops_g116_model",
+            type="model",
+            description="Model trained to classify brain tumor images",
+            metadata={
+                "accuracy": final_accuracy,
+                "precision": final_precision,
+                "recall": final_recall,
+                "f1": final_f1,
+            },
+        )
+        artifact.add_file(str(model_dir / "model.pth"))
+        wandb_run.log_artifact(artifact)
 
     # Plot training loss and accuracy
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
@@ -122,13 +227,19 @@ def train(config) -> None:
     fig.savefig(figure_dir / "training_statistics.png")
     profiler.disable()
     profiler.dump_stats(profile_path)
-    subprocess.run([sys.executable, "-m", "snakeviz", str(profile_path)], check=False)
+    try:
+        subprocess.run([sys.executable, "-m", "snakeviz", str(profile_path)], check=False)
+    except FileNotFoundError:
+        logger.warning("snakeviz is not installed; skipping profiler visualization.")
+    try:
+        subprocess.Popen([sys.executable, "-m", "tensorboard", "--logdir", str(output_dir)])
+    except (FileNotFoundError, OSError):
+        logger.warning("tensorboard is not available; skipping automatic launch.")
+    wandb.finish()
 
 def main() -> None:
     """Run the Hydra training entrypoint."""
     train()
 
 if __name__ == "__main__":
-    train()
-
-## Seguir con profiling Pytorch
+    main()
