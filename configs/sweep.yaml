@@ -1,0 +1,21 @@
+name: mlops_g116_sweep
+project: mlops_g116
+method: random
+metric:
+  goal: minimize
+  name: train_loss
+parameters:
+  lr:
+    min: 0.0001
+    max: 0.01
+    distribution: log_uniform
+  batch_size:
+    values: [32, 64, 128]
+  epochs:
+    values: [5, 10]
+run_cap: 10
+command:
+  - ${env}
+  - ${interpreter}
+  - -m
+  - mlops_g116.train_hydra

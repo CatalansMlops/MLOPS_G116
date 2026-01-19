@@ -81,6 +81,13 @@ def train(config) -> None:
     if wandb_mode:
         wandb_kwargs["mode"] = wandb_mode
     wandb_run = wandb.init(**wandb_kwargs)
+    if "lr" in wandb.config:
+        hparams.lr = float(wandb.config.lr)
+    if "batch_size" in wandb.config:
+        hparams.batch_size = int(wandb.config.batch_size)
+    if "epochs" in wandb.config:
+        hparams.epochs = int(wandb.config.epochs)
+    logger.info(f"Effective hyperparameters: {hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
     model_dir = output_dir / "models"
     figure_dir = output_dir / "reports" / "figures"
     trace_dir = output_dir / "profiler"
