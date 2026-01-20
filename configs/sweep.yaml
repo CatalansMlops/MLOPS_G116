@@ -10,10 +10,10 @@ parameters:
     max: 0.01
     distribution: log_uniform
   batch_size:
-    values: [32, 64, 128]
+    values: [32, 64]
   epochs:
-    values: [5, 10]
-run_cap: 10
+    values: [2, 3]
+run_cap: 3
 command:
   - ${env}
   - ${interpreter}

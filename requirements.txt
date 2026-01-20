@@ -16,3 +16,5 @@ Pillow==12.1.0
 google-cloud-storage==3.8.0
 python-dotenv==1.0.1
 coverage==7.13.1
+snakeviz==2.2.0
+tensorboard==2.20.0

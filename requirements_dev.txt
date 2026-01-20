@@ -16,10 +16,6 @@ mkdocs==1.6.1
 mkdocs-material==9.6.1
 mkdocstrings-python==1.16.10
 
-# profiling
-snakeviz==2.2.0
-tensorboard==2.20.0
-
 pandas==2.2.2
 
 #testing

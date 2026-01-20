@@ -112,8 +112,13 @@ def pull_data(ctx):
 def train(ctx):
     ctx.run("my_cli train")
 
-## Create task to process git (add, commit, push del main y meva branca)
+## Create task to process git (add, commit, push del main y meva branca) + pre-commit 
+## ppot ser complicat per tema errors i demes interrmitjos
 ## Tambe crear tasca per pull cloud
 ## crear tasca per service account de google cloud i baixar les credencials
 ## Modificar tasca dvc (nom arxiu raw.dvc)
 ## Valorar si crear tasca per modul 20 (instalar gcloud sdk i autenticar)
+## Afegir tasca sweep.yaml per optimitzacio hiperparametres:
+##      wandb sweep configs/sweep.yaml
+##      wandb agent <sweep_id>
+

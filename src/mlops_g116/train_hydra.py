@@ -1,8 +1,11 @@
 import cProfile
 import os
 import shutil
+import socket
 import subprocess
 import sys
+import time
+import webbrowser
 from pathlib import Path
 
 import hydra
@@ -32,6 +35,60 @@ DEVICE = torch.device(
 )
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
+
+
+def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
+    """Return an available port, preferring the requested one."""
+    for port in range(preferred_port, preferred_port + max_tries):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            if sock.connect_ex(("127.0.0.1", port)) != 0:
+                return port
+    return preferred_port
+
+def _is_port_open(port: int) -> bool:
+    """Check whether a local TCP port is accepting connections.
+
+    Args:
+        port: TCP port number to probe.
+
+    Returns:
+        True if the port accepts connections, otherwise False.
+    """
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        return sock.connect_ex(("127.0.0.1", port)) == 0
+
+def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: bool) -> None:
+    """Start TensorBoard for the run directory if available.
+
+    Args:
+        output_dir: Directory containing the profiler traces.
+        preferred_port: Preferred port to bind for TensorBoard.
+        open_browser: Whether to open the TensorBoard URL in a browser tab.
+    """
+    tensorboard_cmd = shutil.which("tensorboard")
+    if tensorboard_cmd is None:
+        logger.warning("tensorboard is not installed; skipping automatic launch.")
+        return
+    port = _pick_available_port(preferred_port, max_tries=25)
+    cmd = [
+        tensorboard_cmd,
+        "--logdir",
+        str(output_dir),
+        "--load_fast=false",
+        "--port",
+        str(port),
+    ]
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    url = f"http://localhost:{port}/#pytorch_profiler"
+    for _ in range(25):
+        if _is_port_open(port):
+            logger.info(f"TensorBoard: {url}")
+            if open_browser:
+                webbrowser.open(url, new=2)
+            return
+        time.sleep(0.2)
+    logger.warning(f"TensorBoard did not start. Try: tensorboard --logdir {output_dir} --port {port}")
+
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
 def train(config) -> None:
     '''
@@ -105,6 +162,12 @@ def train(config) -> None:
     # Load corrupted MNIST dataset
     # train_set is used for training, test_set is ignored here
     train_set, _ = load_data()
+    train_labels = train_set.tensors[1]
+    unique_labels, label_counts = torch.unique(train_labels, return_counts=True)
+    label_summary = list(zip(unique_labels.tolist(), label_counts.tolist()))
+    logger.info(f"Train labels: {label_summary}")
+    if hasattr(model, "fc1"):
+        logger.info(f"Model output classes: {model.fc1.out_features}")
     # Wrap dataset into a DataLoader to iterate in mini-batches
     train_dataloader = torch.utils.data.DataLoader(
         train_set, batch_size=hparams.batch_size
@@ -125,6 +188,9 @@ def train(config) -> None:
     for epoch in range(hparams.epochs):
         preds = []
         targets = []
+        epoch_loss = 0.0
+        epoch_acc = 0.0
+        num_batches = 0
         model.train()
         with torch.profiler.profile(
             activities=[torch.profiler.ProfilerActivity.CPU],
@@ -155,6 +221,9 @@ def train(config) -> None:
                     .mean()
                     .item()
                 )
+                epoch_loss += loss.item()
+                epoch_acc += accuracy
+                num_batches += 1
                 statistics["train_accuracy"].append(accuracy)
                 wandb.log({"train_loss": loss.item(), "train_accuracy": accuracy})
 
@@ -163,9 +232,15 @@ def train(config) -> None:
 
                 if i % 100 == 0:
                     logger.info(f"Epoch {epoch}, iter {i}, loss: {loss.item()}")
-                    images = [
-                        wandb.Image(im.detach().cpu(), caption=f"Input {j}") for j, im in enumerate(img[:5])
-                    ]
+                    images = []
+                    for j, im in enumerate(img[:5]):
+                        im_vis = im.detach().cpu()
+                        im_min = im_vis.min()
+                        im_max = im_vis.max()
+                        if (im_max - im_min) > 0:
+                            im_vis = (im_vis - im_min) / (im_max - im_min)
+                        im_vis = (im_vis * 255).clamp(0, 255)
+                        images.append(wandb.Image(im_vis, caption=f"Input {j}"))
                     wandb.log({"images": images})
 
                     grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
@@ -173,6 +248,9 @@ def train(config) -> None:
 
                 prof.step()
 
+        avg_loss = epoch_loss / max(num_batches, 1)
+        avg_acc = epoch_acc / max(num_batches, 1)
+        wandb.log({"epoch_loss": avg_loss, "epoch_acc": avg_acc, "epoch": epoch})
         preds_tensor = torch.cat(preds, 0)
         targets_tensor = torch.cat(targets, 0)
         num_classes = preds_tensor.shape[1]
@@ -200,7 +278,12 @@ def train(config) -> None:
     if final_preds is not None and final_targets is not None:
         final_pred_labels = final_preds.argmax(dim=1)
         final_accuracy = accuracy_score(final_targets.numpy(), final_pred_labels.numpy())
-        final_precision = precision_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
+        final_precision = precision_score(
+            final_targets.numpy(),
+            final_pred_labels.numpy(),
+            average="weighted",
+            zero_division=0,
+        )
         final_recall = recall_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
         final_f1 = f1_score(final_targets.numpy(), final_pred_labels.numpy(), average="weighted")
         wandb.log(
@@ -211,9 +294,10 @@ def train(config) -> None:
                 "final_f1": final_f1,
             }
         )
+        artifact_name = os.getenv("WANDB_ARTIFACT_NAME", "mlops_g116_models")
         artifact = wandb.Artifact(
-            name="mlops_g116_model",
-            type="model",
+            name=artifact_name,
+            type="models",
             description="Model trained to classify brain tumor images",
             metadata={
                 "accuracy": final_accuracy,
@@ -224,6 +308,14 @@ def train(config) -> None:
         )
         artifact.add_file(str(model_dir / "model.pth"))
         wandb_run.log_artifact(artifact)
+        registry_name = os.getenv("WANDB_REGISTRY", "wandb-registry-mlops_g116")
+        collection_name = os.getenv("WANDB_COLLECTION", "mlops_g116")
+        registry_entity = os.getenv("WANDB_REGISTRY_ENTITY") or wandb_entity
+        if registry_entity:
+            target_path = f"{registry_entity}/{registry_name}/{collection_name}"
+        else:
+            target_path = f"{registry_name}/{collection_name}"
+        wandb_run.link_artifact(artifact, target_path=target_path, aliases=["latest"])
 
     # Plot training loss and accuracy
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
@@ -238,20 +330,15 @@ def train(config) -> None:
     profiler.dump_stats(profile_path)
     run_snakeviz = os.getenv("RUN_SNAKEVIZ", "1") == "1"
     run_tensorboard = os.getenv("RUN_TENSORBOARD", "1") == "1"
+    open_tensorboard = os.getenv("OPEN_TENSORBOARD", "1") == "1"
     if run_snakeviz:
         try:
             subprocess.Popen([sys.executable, "-m", "snakeviz", str(profile_path)])
         except FileNotFoundError:
             logger.warning("snakeviz is not installed; skipping profiler visualization.")
     if run_tensorboard:
-        tensorboard_cmd = shutil.which("tensorboard")
-        try:
-            if tensorboard_cmd:
-                subprocess.Popen([tensorboard_cmd, "--logdir", str(output_dir)])
-            else:
-                subprocess.Popen([sys.executable, "-m", "tensorboard.main", "--logdir", str(output_dir)])
-        except (FileNotFoundError, OSError):
-            logger.warning("tensorboard is not available; skipping automatic launch.")
+        preferred_port = int(os.getenv("TENSORBOARD_PORT", "6006"))
+        _launch_tensorboard(output_dir, preferred_port, open_tensorboard)
     wandb.finish()
 
 def main() -> None:
