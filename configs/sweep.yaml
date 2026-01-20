@@ -9,6 +9,10 @@ parameters:
     min: 0.0001
     max: 0.01
     distribution: log_uniform
+  model:
+    values: [simple, resnet18]
+  optimizer:
+    values: [adam, sgd]
   batch_size:
     values: [32, 64]
   epochs:
@@ -19,7 +23,8 @@ command:
   - ${interpreter}
   - -m
   - mlops_g116.train_hydra
-  - --config-path
-  - configs
-  - --config-name
-  - config.yaml
+  - hyperparameters.lr=${lr}
+  - hyperparameters.batch_size=${batch_size}
+  - hyperparameters.epochs=${epochs}
+  - model=${model}
+  - optimizer=${optimizer}

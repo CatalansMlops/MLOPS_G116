@@ -2,7 +2,7 @@ import torch
 import typer
 
 from mlops_g116.data import load_data
-from mlops_g116.model import TumorDetectionModel
+from mlops_g116.model import TumorDetectionModelSimple
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -12,7 +12,7 @@ def evaluate(model_checkpoint: str) -> None:
     print("Evaluating like my life depended on it")
     print(model_checkpoint)
 
-    model = TumorDetectionModel().to(DEVICE)
+    model = TumorDetectionModelSimple().to(DEVICE)
     model.load_state_dict(torch.load(model_checkpoint))
 
     _, test_set = load_data()

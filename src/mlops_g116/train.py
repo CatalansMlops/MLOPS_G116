@@ -3,7 +3,7 @@ import torch
 import typer
 
 from mlops_g116.data import load_data
-from mlops_g116.model import TumorDetectionModel
+from mlops_g116.model import TumorDetectionModelSimple
 
 # Select the best available device:
 # - CUDA if an NVIDIA GPU is available
@@ -34,7 +34,7 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
     print(f"{lr=}, {batch_size=}, {epochs=}")
 
     # Initialize model and move it to the selected device (GPU/CPU)
-    model = TumorDetectionModel().to(DEVICE)
+    model = TumorDetectionModelSimple().to(DEVICE)
 
     # Load corrupted MNIST dataset
     # train_set is used for training, test_set is ignored here

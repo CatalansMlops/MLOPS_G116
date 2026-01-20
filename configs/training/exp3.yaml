@@ -1,0 +1,6 @@
+# @package _global_
+hyperparameters:
+  batch_size: 32
+  lr: 3e-4
+  epochs: 15
+  seed: 789

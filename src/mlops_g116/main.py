@@ -7,7 +7,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
 from mlops_g116.data import load_data
-from mlops_g116.model import TumorDetectionModel
+from mlops_g116.model import TumorDetectionModelSimple
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
@@ -20,7 +20,7 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
     print("Training day and night")
     print(f"{lr=}, {batch_size=}, {epochs=}")
 
-    model = TumorDetectionModel().to(DEVICE)
+    model = TumorDetectionModelSimple().to(DEVICE)
     train_set, _ = load_data()
 
     train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=batch_size)
@@ -66,7 +66,7 @@ def evaluate(model_checkpoint: str) -> None:
     print("Evaluating like my life depended on it")
     print(model_checkpoint)
 
-    model = TumorDetectionModel().to(DEVICE)
+    model = TumorDetectionModelSimple().to(DEVICE)
     model.load_state_dict(torch.load(model_checkpoint))
 
     _, test_set = load_data()
@@ -85,7 +85,7 @@ def evaluate(model_checkpoint: str) -> None:
 @app.command()
 def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> None:
     """Visualize model predictions."""
-    model: torch.nn.Module = TumorDetectionModel().to(DEVICE)
+    model: torch.nn.Module = TumorDetectionModelSimple().to(DEVICE)
     model.load_state_dict(torch.load(model_checkpoint))
     model.eval()
     model.fc = torch.nn.Identity()

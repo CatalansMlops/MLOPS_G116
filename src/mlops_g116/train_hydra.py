@@ -11,6 +11,7 @@ from pathlib import Path
 import hydra
 from loguru import logger
 import matplotlib.pyplot as plt
+from omegaconf import DictConfig, OmegaConf
 from sklearn.metrics import RocCurveDisplay, accuracy_score, f1_score, precision_score, recall_score
 import torch
 import wandb
@@ -23,7 +24,6 @@ except ModuleNotFoundError:
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from mlops_g116.data import load_data
-from mlops_g116.model import TumorDetectionModel
 
 # Select the best available device:
 # - CUDA if an NVIDIA GPU is available
@@ -152,20 +152,12 @@ def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: boo
     logger.warning(f"TensorBoard did not start. Try: tensorboard --logdir {output_dir} --port {port}")
 
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
-def train(config) -> None:
-    '''
-    Train a neural network on the MNIST dataset and save the trained model
-    together with training statistics.
+def train(config: DictConfig) -> None:
+    """Train a model and save artifacts with Hydra configuration.
 
-            Parameters:
-                    lr (float): Learning rate used by the optimizer.
-                    batch_size (int): Number of samples per training batch.
-                    epochs (int): Number of full passes over the training dataset.
-
-            Returns:
-                    None: The function saves the trained model weights to disk
-                          and stores training loss and accuracy plots.
-    '''
+    Args:
+        config: Hydra configuration with hyperparameters, model, and optimizer settings.
+    """
     hparams = config.hyperparameters
     dotenv_available = load_dotenv is not None
     if dotenv_available:
@@ -177,6 +169,8 @@ def train(config) -> None:
     logger.add(output_dir / "train.log", level="INFO")
     logger.info("Training day and night")
     logger.info(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
+    logger.info(f"Model config: {OmegaConf.to_container(config.model, resolve=True)}")
+    logger.info(f"Optimizer config: {OmegaConf.to_container(config.optimizer, resolve=True)}")
     if not dotenv_available:
         logger.warning("python-dotenv is not installed; .env files will not be loaded.")
     wandb_dir = output_dir / "wandb"
@@ -192,6 +186,8 @@ def train(config) -> None:
             "batch_size": hparams.batch_size,
             "epochs": hparams.epochs,
             "seed": hparams.seed,
+            "model": OmegaConf.to_container(config.model, resolve=True),
+            "optimizer": OmegaConf.to_container(config.optimizer, resolve=True),
         },
         "dir": str(wandb_dir),
     }
@@ -200,13 +196,6 @@ def train(config) -> None:
     if wandb_mode:
         wandb_kwargs["mode"] = wandb_mode
     wandb_run = wandb.init(**wandb_kwargs)
-    if "lr" in wandb.config:
-        hparams.lr = float(wandb.config.lr)
-    if "batch_size" in wandb.config:
-        hparams.batch_size = int(wandb.config.batch_size)
-    if "epochs" in wandb.config:
-        hparams.epochs = int(wandb.config.epochs)
-    logger.info(f"Effective hyperparameters: {hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
     model_dir = output_dir / "models"
     figure_dir = output_dir / "reports" / "figures"
     trace_dir = output_dir / "profiler"
@@ -219,7 +208,7 @@ def train(config) -> None:
     logger.info(f"Run outputs saved under: {output_dir}")
 
     # Initialize model and move it to the selected device (GPU/CPU)
-    model = TumorDetectionModel().to(DEVICE)
+    model = instantiate(config.model).to(DEVICE)
 
     # Load corrupted MNIST dataset
     # train_set is used for training, test_set is ignored here

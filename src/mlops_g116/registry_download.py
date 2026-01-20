@@ -4,7 +4,7 @@ from pathlib import Path
 import torch
 import wandb
 
-from mlops_g116.model import TumorDetectionModel
+from mlops_g116.model import TumorDetectionModelSimple
 
 try:
     from dotenv import load_dotenv
@@ -24,7 +24,7 @@ def download_and_load(
     artifact_name = f"{entity}/{registry}/{collection}:{alias}"
     artifact = api.artifact(artifact_name)
     local_dir = Path(artifact.download(root=str(artifact_dir)))
-    model = TumorDetectionModel()
+    model = TumorDetectionModelSimple()
     state_dict = torch.load(local_dir / "model.pth", map_location="cpu")
     model.load_state_dict(state_dict)
     return local_dir
