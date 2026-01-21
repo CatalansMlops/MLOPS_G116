@@ -1,0 +1,5 @@
+fastapi>=0.128.0
+uvicorn>=0.40.0
+python-multipart
+anyio
+# REMOVED torch and torchvision from here because they are now installed directly in the backend.dockerfile
