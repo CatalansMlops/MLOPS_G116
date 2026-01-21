@@ -3,6 +3,12 @@ FROM python:3.12-slim AS base
 
 ARG GOOGLE_CLOUD_PROJECT
 ENV GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+ENV WANDB_PROJECT=mlops_g116
+ENV WANDB_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu
+ENV WANDB_REGISTRY_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu-org
+ENV WANDB_MODE=online
+ENV WANDB_REGISTRY=wandb-registry-mlops_g116
+ENV WANDB_COLLECTION=mlops_g116
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential gcc && \
