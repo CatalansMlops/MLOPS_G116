@@ -1,3 +1,4 @@
 defaults:
   - training: exp1
   - optimizer: adam
+  - model: simple

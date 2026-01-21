@@ -1,10 +1,10 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 
-# Install dependencies from requirements.txt
-pip install -r requirements.txt
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$repo_root"
 
-# Install development dependencies from requirements_dev.txt
-pip install -r requirements_dev.txt
-
-# Install pre-commit hooks
 pre-commit install --install-hooks
+
+if command -v dvc >/dev/null 2>&1; then
+    dvc pull || echo "dvc pull failed. Configure gcloud auth and rerun."
+fi

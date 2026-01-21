@@ -5,7 +5,7 @@ invoke==2.2.0
 pre-commit==4.1.0
 
 # testing
-pytest==8.3.4
+pytest==9.0.2
 coverage==7.8.0
 
 # linting
@@ -15,9 +15,5 @@ ruff==0.11.6
 mkdocs==1.6.1
 mkdocs-material==9.6.1
 mkdocstrings-python==1.16.10
-
-# profiling
-snakeviz==2.2.0
-tensorboard==2.20.0
 
 pandas==2.2.2

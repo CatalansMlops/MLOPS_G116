@@ -1,6 +1,6 @@
 # @package _global_
 hyperparameters:
-  batch_size: 100
+  batch_size: 64
   lr: 1e-3
-  epochs: 10
+  epochs: 8
   seed: 123

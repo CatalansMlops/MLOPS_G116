@@ -12,7 +12,11 @@ train = "my_project.train:main" en pyproject). Tambien se puede seguir usando py
 Modulo 10 --> Docker (docker built: crear imagen + docker run: crear contenedor a partir imagen y train.dockerfile + docker cd/docker run -v: copiar archivos entre
 contenedor y máquina) en /dockerfiles + /.devcontainers (abrir VSC en modo dev-container despues de crear archivo.
 Nombre archivo ha de ser 100% devcontainer.json --> quizas hay que actualizarlo con devcontainer_cookie.json) -->
-Dev Container: Rebuild and Reopen in Container (to enter in this mode)
+Dev Container: Rebuild and Reopen in Container (to enter in this mode). Important:
+
+Docker Tip: If installing the gcloud CLI inside a Docker image, use a single RUN step instead:
+RUN echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg && apt-get update -y && apt-get install google-cloud-cli -y   
+
 · Modulo 11 --> Hydra (crear en configs/config.yaml para almacenar hyperparametros de train.py etc --> Falta hacerlo) --> Hydra es como el substituto de typer
 para evitar tener que entrar argumentos en terminal (y solo cambiar archivo yaml; y guarda configuraciones automaticamente en carpeta
 creado automaticamente "outputs"!!!!! --> valorar si poner en .gitignore, en teoria si) + logging (simplemente canviem print per log.info i s'emmagatzema
@@ -31,6 +35,25 @@ info confidencial/APIS keys,... (wandb) + wandb. IMPORTANTE: En train.py de este
 de otros modulos) --> crea carpeta wandb automaticamente. Acoplar hydra + loguru (carpeta outputs/) amb wandb(carpeta
 wandb/). Artifacts!! --> Mirar web wandb (reproducibilitat, punt 5), opcio crear reports (punt 6). Usar arguments project, entity
 job_type per wand.init (punt 7)!!
+
+· Modulo 20 --> Comandos 100% necessaris per fer instalacio + autentificacio (en WSL, posant que usuari te acces al bucket)
+sudo apt-get update
+sudo apt-get install -y ca-certificates
+sudo update-ca-certificates
+conda install -c conda-forge ca-certificates certifi openssl
+sudo apt-get install apt-transport-https ca-certificates gnupg curl
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+sudo apt-get update && sudo apt-get install google-cloud-cli
+gcloud -h (informatiu, que canceli invoke)
+gcloud auth login --no-launch-browser
+gcloud auth application-default login --no-launch-browser
+gcloud config set project mlops116
+pip install --upgrade google-api-python-client
+gcloud services enable apigateway.googleapis.com
+gcloud services enable servicemanagement.googleapis.com
+gcloud services enable servicecontrol.googleapis.com
+
 
 Contenedor → host
 docker cp experiment1:/models/model.pth ./models/model.pth

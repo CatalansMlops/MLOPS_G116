@@ -4,14 +4,14 @@ import typer
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 
-from mlops_g116.model import TumorDetectionModel
+from mlops_g116.model import TumorDetectionModelSimple
 
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 
 def visualize(model_checkpoint: str, figure_name: str = "embeddings.png") -> None:
     """Visualize model predictions."""
-    model: torch.nn.Module = TumorDetectionModel().to(DEVICE)
+    model: torch.nn.Module = TumorDetectionModelSimple().to(DEVICE)
     model.load_state_dict(torch.load(model_checkpoint))
     model.eval()
     model.fc = torch.nn.Identity()
@@ -47,4 +47,4 @@ def main() -> None:
     typer.run(visualize)
 
 if __name__ == "__main__":
-    typer.run(visualize)
+    main()
