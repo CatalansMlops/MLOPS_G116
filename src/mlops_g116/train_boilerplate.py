@@ -1,5 +1,6 @@
 import typer
 from pytorch_lightning import Trainer
+from pytorch_lightning.loggers import WandbLogger
 from torch.utils.data import DataLoader
 
 from mlops_g116.data import load_data
@@ -18,8 +19,12 @@ def train(lr: float = 1e-3, batch_size: int = 32, epochs: int = 10) -> None:
     # Initialize model
     model = TumorDetectionModelSimple()
 
+    # Create the W&B logger
+    wandb_logger = WandbLogger(project="dtu_mlops")
+
     # Instantiate Lightning Trainer with boilerplate flags
     trainer = Trainer(
+        logger=wandb_logger,
         default_root_dir="lightning_logs",  # Saves checkpoints & logs here
         max_epochs=epochs,                  # Limit epochs (default is 1000)
         limit_train_batches=0.2,            # Use only 20% of training data

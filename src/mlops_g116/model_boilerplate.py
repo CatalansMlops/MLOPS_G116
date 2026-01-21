@@ -56,11 +56,23 @@ class TumorDetectionModelSimple(nn.Module):
         x = self.dropout(x)
         return self.fc1(x)
 
-    def training_step(self, batch):
-        """Training step."""
-        img, target = batch
-        y_pred = self(img)
-        return self.loss_fn(y_pred, target)
+    def training_step(self, batch, batch_idx):
+        data, target = batch
+        preds = self(data)
+        loss = self.criterion(preds, target)
+        acc = (target == preds.argmax(dim=-1)).float().mean()
+        self.log('train_loss', loss)
+        self.log('train_acc', acc)
+        return loss
+
+    def validation_step(self, batch, batch_idx):
+        data, target = batch
+        preds = self(data)
+        loss = self.criterion(preds, target)
+        acc = (target == preds.argmax(dim=-1)).float().mean()
+        # Log metrics for the entire validation epoch
+        self.log('val_loss', loss, on_epoch=True, prog_bar=True)
+        self.log('val_acc', acc, on_epoch=True, prog_bar=True)
 
     def configure_optimizers(self):
         """Configure optimizer."""
