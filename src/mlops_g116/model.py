@@ -63,6 +63,10 @@ class TumorDetectionModelSimple(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Forward pass."""
+        if x.dim() != 4:
+            raise ValueError("Expected input to be a 4D tensor [N, C, H, W].")
+        if x.shape[1] != 1:
+            raise ValueError(f"Expected input to have 1 channel, got {x.shape[1]}.")
         x = torch.relu(self.conv1(x))
         x = torch.max_pool2d(x, 2, 2)
         x = torch.relu(self.conv2(x))
