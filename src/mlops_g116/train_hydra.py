@@ -145,12 +145,25 @@ def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: boo
     for _ in range(25):
         if _is_port_open(port):
             logger.info(f"TensorBoard: {url}")
+            logger.info("If you open a forwarded port, include the /#pytorch_profiler path.")
             if open_browser:
                 webbrowser.open(url, new=2)
             return
         time.sleep(0.2)
     logger.warning(f"TensorBoard did not start. Try: tensorboard --logdir {output_dir} --port {port}")
 
+
+def _launch_snakeviz(profile_path: Path, preferred_port: int) -> None:
+    """Start Snakeviz for the run profile if available."""
+    try:
+        import snakeviz  # noqa: F401
+    except ModuleNotFoundError:
+        logger.warning("snakeviz is not installed; skipping profiler visualization.")
+        return
+    port = _pick_available_port(preferred_port, max_tries=25)
+    cmd = [sys.executable, "-m", "snakeviz", "-p", str(port), str(profile_path)]
+    subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    logger.info(f"Snakeviz: http://127.0.0.1:{port}/snakeviz/")
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
 def train(config) -> None:
     '''
@@ -390,10 +403,7 @@ def train(config) -> None:
     run_tensorboard = os.getenv("RUN_TENSORBOARD", "1") == "1"
     open_tensorboard = os.getenv("OPEN_TENSORBOARD", "1") == "1"
     if run_snakeviz:
-        try:
-            subprocess.Popen([sys.executable, "-m", "snakeviz", str(profile_path)])
-        except FileNotFoundError:
-            logger.warning("snakeviz is not installed; skipping profiler visualization.")
+        _launch_snakeviz(profile_path, preferred_port=8080)
     if run_tensorboard:
         preferred_port = int(os.getenv("TENSORBOARD_PORT", "6006"))
         _launch_tensorboard(output_dir, preferred_port, open_tensorboard)
@@ -402,7 +412,8 @@ def train(config) -> None:
     try:
         _upload_outputs_to_gcs(output_dir, output_bucket, output_prefix)
         logger.info(f"Uploaded outputs to gs://{output_bucket}/{output_prefix}")
-        _cleanup_output_dir(output_dir)
+        if not (run_snakeviz or run_tensorboard):
+            _cleanup_output_dir(output_dir)
     except Exception as exc:
         logger.warning(f"Failed to upload outputs to GCS: {exc}")
     wandb.finish()

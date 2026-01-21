@@ -29,6 +29,26 @@ class ResNet18(nn.Module):
         return self.backbone(x)
 
 
+class DenseNet121(nn.Module):
+    """DenseNet121 classifier adapted for grayscale MRI images."""
+
+    def __init__(self, num_classes: int = 4) -> None:
+        super().__init__()
+        self.backbone = models.densenet121(weights="DEFAULT")
+        self.backbone.features.conv0 = nn.Conv2d(
+            in_channels=1,
+            out_channels=64,
+            kernel_size=7,
+            stride=2,
+            padding=3,
+            bias=False,
+        )
+        self.backbone.classifier = nn.Linear(self.backbone.classifier.in_features, num_classes)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.backbone(x)
+
+
 class TumorDetectionModelSimple(nn.Module):
     """Basic tumor detection model."""
 

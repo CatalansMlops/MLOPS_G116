@@ -1,4 +1,4 @@
 defaults:
   - training: exp1
   - optimizer: adam
-  - model: resnet18
+  - model: simple
