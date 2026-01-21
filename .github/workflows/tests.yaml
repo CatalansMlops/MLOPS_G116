@@ -35,7 +35,7 @@ jobs:
           pip list
 
       # Install DVC
-      - uses: iterative/setup-dvc@v1
+      - uses: iterative/setup-dvc@v2
         with:
           version: '3.65.0'
 
