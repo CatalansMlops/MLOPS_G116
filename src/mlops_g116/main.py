@@ -351,7 +351,8 @@ def main(config: DictConfig) -> None:
                         wandb.log({"train/images": images})
 
                         grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
-                        wandb.log({"train/gradients": wandb.Histogram(grads)})
+                        #wandb.log({"train/gradients": wandb.Histogram(grads)})
+                        wandb.log({"train/gradients": wandb.Histogram(grads.detach().cpu())})
 
                 prof.step()
 
