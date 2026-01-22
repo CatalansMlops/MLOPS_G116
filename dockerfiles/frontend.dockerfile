@@ -13,7 +13,8 @@ COPY src/mlops_g116/frontend.py /app/frontend.py
 
 RUN --mount=type=cache,target=/root/.cache/pip pip install -r requirements_frontend.txt
 
-ENV PORT=8501
+# Cloud run
+#ENV PORT=8501
 
 # FIX: Use 'sh -c' to allow variable expansion of $PORT
 CMD sh -c "streamlit run frontend.py --server.port $PORT --server.address=0.0.0.0"

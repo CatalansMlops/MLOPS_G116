@@ -20,6 +20,7 @@ COPY src/mlops_g116/model.py /app/model.py
 COPY models/model.pth /app/models/model.pth
 
 # 6. Environment & Run
-ENV PORT=8000
+# Cloud run
+#ENV PORT=8000
 CMD uvicorn backend:app --host 0.0.0.0 --port $PORT
 
