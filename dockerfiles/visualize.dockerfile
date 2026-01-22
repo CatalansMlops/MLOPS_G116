@@ -16,6 +16,7 @@ WORKDIR /app
 
 COPY src src/
 COPY configs configs/
+COPY models/model.pth models/model.pth
 COPY data/processed data/processed
 COPY requirements.txt requirements.txt
 COPY README.md README.md

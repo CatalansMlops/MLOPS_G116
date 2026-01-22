@@ -200,6 +200,10 @@ def main(config: DictConfig) -> None:
     logger.add(sys.stderr, level="INFO")
     logger.add(output_dir / "run.log", level="INFO")
     logger.info("Training and evaluation run")
+    logger.info(f"cuda available: {torch.cuda.is_available()}")
+    if torch.cuda.is_available():
+        logger.info(f"cuda devices: {torch.cuda.device_count()}")
+        logger.info(f"cuda name: {torch.cuda.get_device_name(0)}")
     logger.info(f"{hparams.lr=}, {hparams.batch_size=}, {hparams.epochs=}")
     logger.info(f"Model config: {OmegaConf.to_container(config.model, resolve=True)}")
     logger.info(f"Optimizer config: {OmegaConf.to_container(config.optimizer, resolve=True)}")

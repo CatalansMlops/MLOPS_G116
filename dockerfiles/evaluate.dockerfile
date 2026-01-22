@@ -15,6 +15,7 @@ RUN apt update && \
 WORKDIR /app
 
 COPY src src/
+COPY models/model.pth models/model.pth
 COPY configs configs/
 COPY data/processed data/processed
 COPY requirements.txt requirements.txt
