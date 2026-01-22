@@ -30,4 +30,4 @@ extra_args+=("hydra.run.dir=${hydra_run_dir}")
 RUN_SNAKEVIZ="${RUN_SNAKEVIZ:-0}" \
 RUN_TENSORBOARD="${RUN_TENSORBOARD:-0}" \
 OPEN_TENSORBOARD="${OPEN_TENSORBOARD:-0}" \
-exec python3 -u src/mlops_g116/main.py "${extra_args[@]}" "$@"
+exec python3 -m mlops_g116.main "${extra_args[@]}" "$@"

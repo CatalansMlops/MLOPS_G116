@@ -10,6 +10,7 @@ ENV WANDB_MODE=online
 ENV WANDB_COLLECTION_MAIN=mlops_g116-main-models
 ENV WANDB_COLLECTION_MAIN_EVAL=mlops_g116-main-evals
 ENV DVC_CACHE_DIR=/tmp/dvc-cache
+ENV PYTHONPATH=/app/src
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential gcc python3 python3-pip && \
