@@ -15,9 +15,8 @@ RUN pip install --no-cache-dir -r requirements_backend.txt
 RUN pip install --no-cache-dir torch==2.9.1+cpu torchvision==0.24.1+cpu --index-url https://download.pytorch.org/whl/cpu
 # 4. Copy the Backend Code
 # Assuming your terminal is at project root and backend.py is in src/mlops_g116/
-COPY src/mlops_g116/backend.py /app/backend.py
-COPY src/mlops_g116/model.py /app/model.py
-COPY models/model.pth /app/models/model.pth
+COPY src src/
+COPY models/model.pth models/model.pth
 
 # 6. Environment & Run
 # Cloud run

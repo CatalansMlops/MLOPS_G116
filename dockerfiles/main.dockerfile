@@ -21,7 +21,7 @@ COPY src src/
 COPY configs configs/
 COPY .dvc/config .dvc/config
 COPY data/*.dvc data/
-COPY requirements.txt requirements.txt
+COPY requirements_GPU.txt requirements_GPU.txt
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
 COPY dockerfiles/main_entrypoint.sh /usr/local/bin/main_entrypoint.sh
