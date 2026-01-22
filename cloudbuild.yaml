@@ -18,6 +18,63 @@ steps:
       'push',
       'europe-west1-docker.pkg.dev/dtumlops-484509/mlops-container-images/cloud-container:latest'
     ]
+    
+# ==========================================================
+# 1. BACKEND PIPELINE
+# ==========================================================
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build Backend'
+  args: [
+    'build', '.',
+    '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/backend:latest',
+    '-f', 'backend.dockerfile'  # REPLACE with your actual backend Dockerfile name/path
+  ]
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push Backend'
+  args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/backend:latest']
+  waitFor: ['Build Backend']
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Deploy Backend'
+  args: [
+    'run', 'deploy', 'backend',  # Service name matches your Python script
+    '--image', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/backend:latest',
+    '--region', 'europe-west1',
+    '--platform', 'managed',
+    '--memory', '2Gi',            # CRITICAL: Fixes the OOM crash
+    '--allow-unauthenticated'     # Makes the API public so Frontend can reach it
+  ]
+  waitFor: ['Push Backend']
+
+
+# ==========================================================
+# 2. FRONTEND PIPELINE (Runs in Parallel)
+# ==========================================================
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Build Frontend'
+  args: [
+    'build', '.',
+    '-t', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/frontend:latest',
+    '-f', 'frontend.dockerfile' # REPLACE with your actual frontend Dockerfile name/path
+  ]
+  waitFor: ['-'] # Start immediately (don't wait for backend)
+
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'Push Frontend'
+  args: ['push', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/frontend:latest']
+  waitFor: ['Build Frontend']
+
+- name: 'gcr.io/cloud-builders/gcloud'
+  id: 'Deploy Frontend'
+  args: [
+    'run', 'deploy', 'frontend',
+    '--image', 'europe-west1-docker.pkg.dev/$PROJECT_ID/mlops-container-images/frontend:latest',
+    '--region', 'europe-west1',
+    '--platform', 'managed',
+    '--allow-unauthenticated'
+  ]
+  waitFor: ['Push Frontend']
 
 options:
   logging: CLOUD_LOGGING_ONLY
