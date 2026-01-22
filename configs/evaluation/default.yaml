@@ -1,0 +1,4 @@
+# @package _global_
+evaluation:
+  batch_size: 32
+  checkpoint_path: models/model.pth

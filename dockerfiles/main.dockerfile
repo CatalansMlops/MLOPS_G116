@@ -7,8 +7,8 @@ ENV WANDB_PROJECT=mlops_g116
 ENV WANDB_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu
 ENV WANDB_REGISTRY_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu-org
 ENV WANDB_MODE=online
-ENV WANDB_REGISTRY=wandb-registry-mlops_g116
-ENV WANDB_COLLECTION_TRAIN=mlops_g116-train-local
+ENV WANDB_COLLECTION_MAIN=mlops_g116-main-models
+ENV WANDB_COLLECTION_MAIN_EVAL=mlops_g116-main-evals
 ENV DVC_CACHE_DIR=/tmp/dvc-cache
 
 RUN apt update && \
@@ -24,7 +24,7 @@ COPY data/*.dvc data/
 COPY requirements.txt requirements.txt
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
-COPY dockerfiles/train_entrypoint.sh /usr/local/bin/train_entrypoint.sh
+COPY dockerfiles/main_entrypoint.sh /usr/local/bin/main_entrypoint.sh
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt --verbose
@@ -32,5 +32,5 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install . --no-deps --verbose
 RUN dvc config core.no_scm true
 
-RUN chmod +x /usr/local/bin/train_entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/train_entrypoint.sh"]
+RUN chmod +x /usr/local/bin/main_entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/main_entrypoint.sh"]

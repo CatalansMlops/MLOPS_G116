@@ -22,7 +22,7 @@ command:
   - ${env}
   - ${interpreter}
   - -m
-  - mlops_g116.train_hydra
+  - mlops_g116.main
   - hyperparameters.lr=${lr}
   - hyperparameters.batch_size=${batch_size}
   - hyperparameters.epochs=${epochs}

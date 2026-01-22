@@ -55,13 +55,27 @@ gcloud services enable servicemanagement.googleapis.com
 gcloud services enable servicecontrol.googleapis.com
 
 
-Contenedor → host
-docker cp experiment1:/models/model.pth ./models/model.pth
-Host → contenedor
-docker cp ./models/model.pth experiment1:/models/model.pth
+docker build -f dockerfiles/main.dockerfile \
+  --build-arg GOOGLE_CLOUD_PROJECT=dtumlops \
+  -t mlops-main:latest .
 
-BIDIRECCIONAL (SINCRONIZACION CONSTANTE)
-docker run --name experiment1 -v "$(pwd)/models:/models" train:latest
+
+
+docker run --rm \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/sa.json \
+  -v /home/slupo/MLops/MLOps_G116/dvc-484113-4b1eb26d3ec8.json:/tmp/sa.json:ro \
+  -v /tmp/dvc-cache:/tmp/dvc-cache \
+  -e WANDB_API_KEY=TU_KEY \
+  mlops-main:latest \
+  training=exp2 hyperparameters.epochs=1
+
+docker run --rm \
+  -e GOOGLE_APPLICATION_CREDENTIALS=/tmp/adc.json \
+  -v ~/.config/gcloud/application_default_credentials.json:/tmp/adc.json:ro \
+  -v /tmp/dvc-cache:/tmp/dvc-cache \
+  -e WANDB_API_KEY=TU_KEY \
+  mlops-main:latest \
+  training=exp2 hyperparameters.epochs=1
 
 
 

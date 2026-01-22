@@ -1,15 +1,12 @@
 # syntax=docker/dockerfile:1.4
 FROM python:3.12-slim AS base
 
-ARG GOOGLE_CLOUD_PROJECT
-ENV GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
 ENV WANDB_PROJECT=mlops_g116
 ENV WANDB_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu
 ENV WANDB_REGISTRY_ENTITY=sergi-luponsantacana-danmarks-tekniske-universitet-dtu-org
 ENV WANDB_MODE=online
 ENV WANDB_REGISTRY=wandb-registry-mlops_g116
-ENV WANDB_COLLECTION_TRAIN=mlops_g116-train-local
-ENV DVC_CACHE_DIR=/tmp/dvc-cache
+ENV WANDB_COLLECTION_EVAL=mlops_g116-eval-local
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential gcc && \
@@ -19,18 +16,16 @@ WORKDIR /app
 
 COPY src src/
 COPY configs configs/
-COPY .dvc/config .dvc/config
-COPY data/*.dvc data/
+COPY data/processed data/processed
 COPY requirements.txt requirements.txt
 COPY README.md README.md
 COPY pyproject.toml pyproject.toml
-COPY dockerfiles/train_entrypoint.sh /usr/local/bin/train_entrypoint.sh
+COPY dockerfiles/evaluate_entrypoint.sh /usr/local/bin/evaluate_entrypoint.sh
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements.txt --verbose
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install . --no-deps --verbose
-RUN dvc config core.no_scm true
 
-RUN chmod +x /usr/local/bin/train_entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/train_entrypoint.sh"]
+RUN chmod +x /usr/local/bin/evaluate_entrypoint.sh
+ENTRYPOINT ["/usr/local/bin/evaluate_entrypoint.sh"]
