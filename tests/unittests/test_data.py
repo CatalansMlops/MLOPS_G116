@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 
 _TEST_ROOT = os.path.dirname(__file__)
-_PROJECT_ROOT = os.path.dirname(_TEST_ROOT)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(_TEST_ROOT))
 _PATH_DATA = os.path.join(_PROJECT_ROOT, "data")
 
 RAW_DIR = os.path.join(_PATH_DATA, "raw", "brain_dataset")
