@@ -3,17 +3,21 @@ set -euo pipefail
 
 cd /app
 
-if [[ ! -f data/processed.dvc ]]; then
-    echo "data/processed.dvc not found. Run the data container first." >&2
-    exit 1
-fi
-
-dvc_cache_dir="${DVC_CACHE_DIR:-/tmp/dvc-cache}"
-mkdir -p "$dvc_cache_dir"
-dvc config cache.dir "$dvc_cache_dir"
-if ! dvc pull data/processed.dvc; then
-    echo "dvc pull failed. Check GCS credentials and GOOGLE_CLOUD_PROJECT." >&2
-    exit 1
+data_root="${DATA_ROOT:-data/processed}"
+if [[ "$data_root" == /gcs/* ]]; then
+    echo "Using mounted GCS data at $data_root; skipping dvc pull."
+else
+    if [[ ! -f data/processed.dvc ]]; then
+        echo "data/processed.dvc not found. Run the data container first." >&2
+        exit 1
+    fi
+    dvc_cache_dir="${DVC_CACHE_DIR:-/tmp/dvc-cache}"
+    mkdir -p "$dvc_cache_dir"
+    dvc config cache.dir "$dvc_cache_dir"
+    if ! dvc pull data/processed.dvc; then
+        echo "dvc pull failed. Check GCS credentials and GOOGLE_CLOUD_PROJECT." >&2
+        exit 1
+    fi
 fi
 
 extra_args=()

@@ -3,10 +3,12 @@ workerPoolSpecs:
     machineType: n1-standard-4
   replicaCount: 1
   containerSpec:
-    imageUri: europe-west1-docker.pkg.dev/dtumlops-484509/mlops-container-images/cloud-container:latest
+    imageUri: europe-west1-docker.pkg.dev/dtumlops-484509/mlops-container-images/main:latest
     env:
     - name: WANDB_API_KEY
       value: ${WANDB_API_KEY}
+    - name: DATA_ROOT
+      value: /gcs/mlops116/data/processed
     args:
     - training='exp1'
     - hyperparameters.epochs='1'

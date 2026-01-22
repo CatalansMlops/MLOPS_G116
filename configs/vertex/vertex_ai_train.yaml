@@ -36,7 +36,7 @@ steps:
   ]
 
 substitutions:
-  _VERTEX_TRAIN_CONFIG: 'vertex.yaml'
+  _VERTEX_TRAIN_CONFIG: 'configs/vertex/vertex.yaml'
 
 
 availableSecrets:

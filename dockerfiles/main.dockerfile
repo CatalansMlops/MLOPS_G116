@@ -27,7 +27,7 @@ COPY pyproject.toml pyproject.toml
 COPY dockerfiles/main_entrypoint.sh /usr/local/bin/main_entrypoint.sh
 
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install -r requirements.txt --verbose
+    pip install -r requirements_GPU.txt --verbose
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install . --no-deps --verbose
 RUN dvc config core.no_scm true

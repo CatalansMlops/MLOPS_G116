@@ -1,30 +1,34 @@
 name: mlops_g116_sweep
 project: mlops_g116
-method: random
+method: grid
+
 metric:
-  goal: minimize
-  name: train_loss
+  goal: maximize
+  name: test/accuracy
+
 parameters:
-  lr:
-    min: 0.0001
-    max: 0.01
-    distribution: log_uniform
+  hyperparameters.lr:
+    values: [0.0001, 0.001, 0.01]
+  hyperparameters.batch_size:
+    values: [32, 64]
+  hyperparameters.epochs:
+    value: 10
   model:
     values: [simple, resnet18, densenet121]
   optimizer:
     values: [adam, sgd]
-  batch_size:
-    values: [32, 64]
-  epochs:
-    values: [2, 3]
-run_cap: 3
+
+# opcional: limita el total de runs si quieres
+# run_cap: 12
+
 command:
   - ${env}
   - ${interpreter}
   - -m
   - mlops_g116.main
-  - hyperparameters.lr=${lr}
-  - hyperparameters.batch_size=${batch_size}
-  - hyperparameters.epochs=${epochs}
+  - hyperparameters.lr=${hyperparameters.lr}
+  - hyperparameters.batch_size=${hyperparameters.batch_size}
+  - hyperparameters.epochs=${hyperparameters.epochs}
   - model=${model}
   - optimizer=${optimizer}
+

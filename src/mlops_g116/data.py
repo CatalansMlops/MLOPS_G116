@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from PIL import Image
 import torch
 from torchvision import transforms
@@ -62,12 +63,34 @@ def preprocess(raw_dir: str = "data/raw/brain_dataset", processed_dir: str = "da
 
     print("Data processed and saved in", processed_dir)
 
-def load_data():
-    """Load processed dataset and return PyTorch TensorDataset"""
-    train_images = torch.load("data/processed/train_images.pt")
-    train_target = torch.load("data/processed/train_target.pt")
-    test_images = torch.load("data/processed/test_images.pt")
-    test_target = torch.load("data/processed/test_target.pt")
+def _resolve_processed_dir(processed_dir: str | Path | None = None) -> Path:
+    """Resolve the processed data directory.
+
+    Args:
+        processed_dir: Optional override path to the processed dataset directory.
+
+    Returns:
+        Path to the processed dataset directory.
+    """
+    if processed_dir is not None:
+        return Path(processed_dir)
+    return Path(os.getenv("DATA_ROOT", "data/processed"))
+
+
+def load_data(processed_dir: str | Path | None = None):
+    """Load processed dataset and return PyTorch TensorDataset.
+
+    Args:
+        processed_dir: Optional override path to the processed dataset directory.
+
+    Returns:
+        Tuple of (train_set, test_set).
+    """
+    data_root = _resolve_processed_dir(processed_dir)
+    train_images = torch.load(data_root / "train_images.pt")
+    train_target = torch.load(data_root / "train_target.pt")
+    test_images = torch.load(data_root / "test_images.pt")
+    test_target = torch.load(data_root / "test_target.pt")
 
     train_set = torch.utils.data.TensorDataset(train_images, train_target)
     test_set = torch.utils.data.TensorDataset(test_images, test_target)
