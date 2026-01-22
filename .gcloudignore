@@ -1,0 +1,23 @@
+# Python/cache
+__pycache__/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+.venv/
+.conda/
+
+# Local artifacts
+outputs/
+wandb/
+reports/
+
+# Data (keep DVC files only)
+data/**
+!data/*.dvc
+
+# Git and local files
+.git/
+*.log
