@@ -52,48 +52,48 @@ will check the repositories and the code to verify your answers.
 
 ### Week 1
 
-* [ ] Create a git repository (M5)
-* [ ] Make sure that all team members have write access to the GitHub repository (M5)
-* [ ] Create a dedicated environment for you project to keep track of your packages (M2)
-* [ ] Create the initial file structure using cookiecutter with an appropriate template (M6)
-* [ ] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
-* [ ] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
-* [ ] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
+* [X] Create a git repository (M5)
+* [X] Make sure that all team members have write access to the GitHub repository (M5)
+* [X] Create a dedicated environment for you project to keep track of your packages (M2)
+* [X] Create the initial file structure using cookiecutter with an appropriate template (M6)
+* [X] Fill out the `data.py` file such that it downloads whatever data you need and preprocesses it (if necessary) (M6)
+* [X] Add a model to `model.py` and a training procedure to `train.py` and get that running (M6)
+* [X] Remember to either fill out the `requirements.txt`/`requirements_dev.txt` files or keeping your
     `pyproject.toml`/`uv.lock` up-to-date with whatever dependencies that you are using (M2+M6)
-* [ ] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
-* [ ] Do a bit of code typing and remember to document essential parts of your code (M7)
-* [ ] Setup version control for your data or part of your data (M8)
-* [ ] Add command line interfaces and project commands to your code where it makes sense (M9)
-* [ ] Construct one or multiple docker files for your code (M10)
-* [ ] Build the docker files locally and make sure they work as intended (M10)
-* [ ] Write one or multiple configurations files for your experiments (M11)
-* [ ] Used Hydra to load the configurations and manage your hyperparameters (M11)
+* [X] Remember to comply with good coding practices (`pep8`) while doing the project (M7)
+* [X] Do a bit of code typing and remember to document essential parts of your code (M7)
+* [X] Setup version control for your data or part of your data (M8)
+* [X] Add command line interfaces and project commands to your code where it makes sense (M9)
+* [X] Construct one or multiple docker files for your code (M10)
+* [X] Build the docker files locally and make sure they work as intended (M10)
+* [X] Write one or multiple configurations files for your experiments (M11)
+* [X] Used Hydra to load the configurations and manage your hyperparameters (M11)
 * [ ] Use profiling to optimize your code (M12)
-* [ ] Use logging to log important events in your code (M14)
-* [ ] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
+* [X] Use logging to log important events in your code (M14)
+* [X] Use Weights & Biases to log training progress and other important metrics/artifacts in your code (M14)
 * [ ] Consider running a hyperparameter optimization sweep (M14)
 * [ ] Use PyTorch-lightning (if applicable) to reduce the amount of boilerplate in your code (M15)
 
 ### Week 2
 
-* [ ] Write unit tests related to the data part of your code (M16)
-* [ ] Write unit tests related to model construction and or model training (M16)
-* [ ] Calculate the code coverage (M16)
-* [ ] Get some continuous integration running on the GitHub repository (M17)
+* [X] Write unit tests related to the data part of your code (M16)
+* [X] Write unit tests related to model construction and or model training (M16)
+* [X] Calculate the code coverage (M16)
+* [X] Get some continuous integration running on the GitHub repository (M17)
 * [ ] Add caching and multi-os/python/pytorch testing to your continuous integration (M17)
-* [ ] Add a linting step to your continuous integration (M17)
-* [ ] Add pre-commit hooks to your version control setup (M18)
+* [X] Add a linting step to your continuous integration (M17)
+* [X] Add pre-commit hooks to your version control setup (M18)
 * [ ] Add a continues workflow that triggers when data changes (M19)
 * [ ] Add a continues workflow that triggers when changes to the model registry is made (M19)
-* [ ] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
-* [ ] Create a trigger workflow for automatically building your docker images (M21)
-* [ ] Get your model training in GCP using either the Engine or Vertex AI (M21)
-* [ ] Create a FastAPI application that can do inference using your model (M22)
-* [ ] Deploy your model in GCP using either Functions or Run as the backend (M23)
-* [ ] Write API tests for your application and setup continues integration for these (M24)
-* [ ] Load test your application (M24)
+* [X] Create a data storage in GCP Bucket for your data and link this with your data version control setup (M21)
+* [X] Create a trigger workflow for automatically building your docker images (M21)
+* [X] Get your model training in GCP using either the Engine or Vertex AI (M21)
+* [X] Create a FastAPI application that can do inference using your model (M22)
+* [X] Deploy your model in GCP using either Functions or Run as the backend (M23)
+* [X] Write API tests for your application and setup continues integration for these (M24)
+* [X] Load test your application (M24)
 * [ ] Create a more specialized ML-deployment API using either ONNX or BentoML, or both (M25)
-* [ ] Create a frontend for your API (M26)
+* [X] Create a frontend for your API (M26)
 
 ### Week 3
 
@@ -168,8 +168,7 @@ Group 116
 >
 > Answer:
 
-*We used conda for managing our dependencies. The list of dependencies was auto-generated using pip freeze. To get a*
-> *complete copy of our development environment, one would have to run the following commands: 1) git clone <repository> 2) pip install invoke 3) invoke conda (installs requirements.txt and requirements_dev.txt) 4) invoke gcloud (gcloud auth application-default login). Also grant access to google cloud platform 'dtu_mlops' project*
+*We used conda for managing our dependencies. The list of dependencies was auto-generated using pip freeze. To get a complete copy of our development environment, one would have to run the following commands: 1) git clone <repository> 2) pip install invoke 3) invoke conda (installs requirements.txt and requirements_dev.txt) 4) invoke gcloud (gcloud auth application-default login). Also grant access to google cloud platform 'dtu_mlops' project*
 
 ### Question 5
 
@@ -219,7 +218,8 @@ Group 116
 >
 > Answer:
 
---- question 7 fill here ---
+*In total we have implemented 3 tests. Primarily we are testing the data/raw folder structrue and images, the... and ... as these the most critical parts of our*
+> *application but also ... .*
 
 ### Question 8
 
@@ -249,7 +249,8 @@ Group 116
 >
 > Answer:
 
---- question 9 fill here ---
+*We made use of both branches and PRs in our project. In our group, each member had a branch that they worked on in. So in remote we had 4 branches (main and 3 personal ones) and local each one had 2 branches (main+personal). When it was time to upload to git, we added, commited and pushed the personal branch, then switched to main, merged with the personal branch and then pulled from github. That way we could solve the discrepancies locally without messing the code. Finally when everything was up-to-date we pushed the code.*
+
 
 ### Question 10
 
@@ -259,12 +260,15 @@ Group 116
 > Recommended answer length: 100-200 words.
 >
 > Example:
-> *We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our*
+
+
+*We did make use of DVC in the following way: ... . In the end it helped us in ... for controlling ... part of our*
 > *pipeline*
->
+
 > Answer:
 
---- question 10 fill here ---
+ *We did make use of DVC in the following way: We created a Cloud Storage (Bucket) where we uploaded the data/raw files. We initialized the dvc in our repo and connected to the bucket, creating a connection between the local and cloud storages in our pipeline.
+In the end it helped us in doing data version control of our data and also enabling quick download of data via dvc pull when cloning the repository (given that the data is not in git)*
 
 ### Question 11
 
@@ -379,7 +383,8 @@ Group 116
 >
 > Answer:
 
---- question 17 fill here ---
+*We used the following two services: Cloud Build, Artifact Registry, Cloud Run, Compute Engine, Vertex AI and Cloud Storage (Bucket).
+Cloud Build is for building the images (via trigger) and pushing them to the Artifact Registry, where the containers are stored and CLoud Run runns them. Engine and Vertex AI are used to train the models (using CPU to increase the speed). Bucket is used to store the dataset in the cloud.*
 
 ### Question 18
 
@@ -394,7 +399,8 @@ Group 116
 >
 > Answer:
 
---- question 18 fill here ---
+> *We used the compute engine to run our Virtual Machines. We used instances with the following hardware: Nvidia T4 GPUs (3 GPUs granted) and we used them to train our models*
+> *using a custom container: ...*
 
 ### Question 19
 
@@ -436,7 +442,7 @@ Group 116
 >
 > Answer:
 
---- question 22 fill here ---
+*We managed to train our model in the cloud using the Vertex AI. We did this by creating an actionable trigger (.ymal) that trained the models. The reason we choose the Vertex AI was because it was more simple and it was quicker*
 
 ## Deployment
 
