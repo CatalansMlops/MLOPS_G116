@@ -178,11 +178,9 @@ cython_debug/
 /data/*
 !/data/*.dvc
 
-# Ignore temporal folder
+# Ignore temporal folder and TODO file
 /temporal
-
-#Ignore temporal folder
-/temporal
+TODO.txt
 
 .devcontainer/default.json
 

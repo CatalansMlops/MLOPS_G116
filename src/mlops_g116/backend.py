@@ -7,9 +7,9 @@ from fastapi import FastAPI, File, HTTPException, UploadFile
 from PIL import Image
 from torchvision import transforms
 # Local
-# from src.mlops_g116.model import TumorDetectionModelSimple
+from src.mlops_g116.model import TumorDetectionModelSimple
 # Docker
-from model import TumorDetectionModelSimple
+#from model import TumorDetectionModelSimple
 
 # Constants
 MODEL_CHECKPOINT = "models/model.pth"
@@ -87,13 +87,6 @@ def predict_image(image_path: str, top_k: int = 4): # Changed default to 4 (max 
 async def root():
     """Root endpoint."""
     return {"message": "Hello from the backend!"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int):
-    """Get an item by id."""
-    return {"item_id": item_id}
-
 
 # FastAPI endpoint for image classification@app.post("/classify/")
 @app.post("/classify/")
