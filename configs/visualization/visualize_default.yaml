@@ -1,0 +1,4 @@
+# @package _global_
+batch_size: 32
+checkpoint_path: models/model.pth
+figure_name: embedding_tsne.png

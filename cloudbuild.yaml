@@ -1,11 +1,15 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
   id: 'Build container image'
+  env:
+    - 'DOCKER_BUILDKIT=1'
   args:
     [
       'build',
       '-f',
-      'dockerfiles/train.local.dockerfile',
+      'dockerfiles/main.dockerfile',
+      '--build-arg',
+      'GOOGLE_CLOUD_PROJECT=dtumlops',
       '-t',
       'europe-west1-docker.pkg.dev/dtumlops-484509/mlops-container-images/cloud-container:latest',
       '.'

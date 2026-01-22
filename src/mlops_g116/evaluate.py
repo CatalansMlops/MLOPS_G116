@@ -117,11 +117,19 @@ def evaluate(config: DictConfig) -> None:
     if not dotenv_available:
         logger.warning("python-dotenv is not installed; .env files will not be loaded.")
 
-    evaluation_config = config.evaluations if "evaluations" in config else config.evaluation
-    batch_size = evaluation_config.batch_size
-    checkpoint_path = Path(evaluation_config.checkpoint_path)
+    try:
+        batch_size = config.batch_size
+        checkpoint_path = Path(config.checkpoint_path)
+    except AttributeError as exc:
+        raise KeyError(
+            "Missing evaluation configuration. Expected 'batch_size' and 'checkpoint_path' at the root level."
+        ) from exc
+    evaluation_config = {
+        "batch_size": batch_size,
+        "checkpoint_path": str(checkpoint_path),
+    }
     logger.info(f"Model config: {OmegaConf.to_container(config.model, resolve=True)}")
-    logger.info(f"Evaluation config: {OmegaConf.to_container(evaluation_config, resolve=True)}")
+    logger.info(f"Evaluation config: {evaluation_config}")
 
     wandb_project = os.getenv("WANDB_PROJECT", "mlops_g116")
     wandb_entity = os.getenv("WANDB_ENTITY")
@@ -130,7 +138,7 @@ def evaluate(config: DictConfig) -> None:
         "project": wandb_project,
         "job_type": "eval_local",
         "config": {
-            "evaluation": OmegaConf.to_container(evaluation_config, resolve=True),
+            "evaluation": evaluation_config,
             "model": OmegaConf.to_container(config.model, resolve=True),
         },
         "dir": str(wandb_dir),

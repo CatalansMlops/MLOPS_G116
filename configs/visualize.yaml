@@ -1,0 +1,3 @@
+defaults:
+  - model: simple
+  - visualization: visualize_default
