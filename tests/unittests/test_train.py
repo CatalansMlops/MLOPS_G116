@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 import socket
+import sys
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
-from mlops_g116.train import _is_port_open, _pick_available_port
+from mlops_g116.train import _is_port_open, _launch_snakeviz, _launch_tensorboard, _pick_available_port
 
 
 def _bind_listening_socket() -> tuple[socket.socket, int]:
@@ -46,3 +49,38 @@ def test_pick_available_port_falls_back_when_range_busy() -> None:
     finally:
         sock.close()
         sock_next.close()
+
+
+def test_launch_tensorboard_skips_when_missing(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Ensure _launch_tensorboard returns early when tensorboard is unavailable."""
+    monkeypatch.setattr("mlops_g116.train.shutil.which", lambda *_args: None)
+
+    def _raise(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("subprocess.Popen should not be called when tensorboard is missing")
+
+    monkeypatch.setattr("mlops_g116.train.subprocess.Popen", _raise)
+    _launch_tensorboard(tmp_path, preferred_port=6006, open_browser=False)
+
+
+def test_launch_snakeviz_invokes_subprocess(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Ensure _launch_snakeviz invokes subprocess when snakeviz is available."""
+    monkeypatch.setitem(sys.modules, "snakeviz", SimpleNamespace())
+    called: dict[str, list[str]] = {}
+
+    def _fake_popen(cmd: list[str], *_args: object, **_kwargs: object) -> SimpleNamespace:
+        called["cmd"] = cmd
+        return SimpleNamespace()
+
+    monkeypatch.setattr("mlops_g116.train.subprocess.Popen", _fake_popen)
+
+    def _pick_port(preferred_port: int, max_tries: int = 25) -> int:
+        return preferred_port + 1
+
+    monkeypatch.setattr("mlops_g116.train._pick_available_port", _pick_port)
+
+    profile_path = tmp_path / "profile.prof"
+    profile_path.write_text("data", encoding="utf-8")
+    _launch_snakeviz(profile_path, preferred_port=8080)
+
+    assert called["cmd"][0] == sys.executable
+    assert called["cmd"][2] == "snakeviz"

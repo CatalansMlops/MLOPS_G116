@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import socket
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -56,6 +57,26 @@ def test_strip_classifier_replaces_backbone_fc() -> None:
     model = SimpleNamespace(backbone=backbone)
     main_module._strip_classifier(model)
     assert isinstance(model.backbone.fc, torch.nn.Identity), "Expected backbone fc to be Identity"
+
+
+def test_strip_classifier_replaces_backbone_classifier() -> None:
+    """Ensure _strip_classifier replaces backbone classifier head."""
+    backbone = SimpleNamespace(classifier=torch.nn.Linear(4, 2))
+    model = SimpleNamespace(backbone=backbone)
+    main_module._strip_classifier(model)
+    assert isinstance(model.backbone.classifier, torch.nn.Identity), "Expected backbone classifier to be Identity"
+
+
+def test_is_port_open_detects_listening_port() -> None:
+    """Ensure _is_port_open returns True for a listening socket."""
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind(("127.0.0.1", 0))
+    sock.listen(1)
+    port = sock.getsockname()[1]
+    try:
+        assert main_module._is_port_open(port), f"Expected port {port} to be open"
+    finally:
+        sock.close()
 
 
 def test_upload_outputs_to_gcs_uploads_files(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -129,3 +150,14 @@ def test_launch_snakeviz_invokes_subprocess(monkeypatch: pytest.MonkeyPatch, tmp
 
     assert called["cmd"][0] == main_module.sys.executable, "Expected Python executable in command"
     assert called["cmd"][2] == "snakeviz", f"Unexpected command: {called['cmd']}"
+
+
+def test_resolve_output_prefix_uses_cwd(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Ensure output prefix is relative to cwd when possible."""
+    monkeypatch.chdir(tmp_path)
+    output_dir = tmp_path / "runs" / "exp1"
+    output_dir.mkdir(parents=True)
+
+    prefix = main_module._resolve_output_prefix(output_dir, None)
+
+    assert prefix == "runs/exp1", f"Unexpected prefix: {prefix}"
