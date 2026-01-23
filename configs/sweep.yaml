@@ -25,9 +25,4 @@ command:
   - ${env}
   - python3
   - -m
-  - mlops_g116.main
-  - hyperparameters.lr=${lr}
-  - hyperparameters.batch_size=${batch_size}
-  - hyperparameters.epochs=${epochs}
-  - model=${model}
-  - optimizer=${optimizer}
+  - mlops_g116.sweep_runner
