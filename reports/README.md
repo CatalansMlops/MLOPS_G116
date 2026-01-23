@@ -134,7 +134,7 @@ Group 116
 >
 > Answer:
 
-*s254311, s253742, s253749*---
+> *s254311, s253742, s253749*---
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -148,13 +148,7 @@ Group 116
 >
 > Answer:
 
-Yes. We used a few open-source packages beyond the core course stack: Streamlit to build a lightweight web frontend for
-interactive image upload and prediction display; Locust to load test the FastAPI service and quantify throughput under
-concurrency; Loguru for simpler structured logging across training/evaluation scripts; Snakeviz to visualize profiling
-outputs during performance checks; python-dotenv to load local environment variables for W&B and registry settings; and
-the Google Cloud Python SDKs (google-cloud-storage and google-cloud-run) to read data from GCS and discover the Cloud
-Run backend URL from the frontend. These tools helped us deliver a usable UI, validate performance, and streamline
-cloud integration.
+> No. We did not use open-source frameworks or packages outside the course syllabus. The tools covered in the  course already provided everything we needed for data versioning, experimentation, deployment, testing, and monitoring, so we did not add any external frameworks beyond those.
 
 ## Coding environment
 
@@ -174,7 +168,11 @@ cloud integration.
 >
 > Answer:
 
-*We used conda for managing our dependencies. The list of dependencies was auto-generated using pip freeze. To get a complete copy of our development environment, one would have to run the following commands: 1) git clone <repository> 2) pip install invoke 3) invoke conda (installs requirements.txt and requirements_dev.txt) 4) invoke gcloud (gcloud auth application-default login). Also grant access to google cloud platform 'dtu_mlops' project*
+> We managed dependencies with pip and pinned requirements files stored in the repo, which were created using "pip freeze" and "pipreqs". `requirements.txt` contains runtime packages and `requirements_dev.txt` adds test, lint, and docs tools; `pyproject.toml` exposes these as dynamic dependencies for editable installs. A new member can reproduce the environment by cloning the repo, creating a Python
+3.12 conda environment, activating it, upgrading pip/setuptools/wheel, then running `pip install -r requirements.txt` and `pip install -e .`; for development tooling, add `pip install -e .[dev]`. We also provide Invoke tasks in `tasks.py`
+(`invoke create_environment`, `invoke requirements`, `invoke dev_requirements`) to standardize these steps. For extra
+reproducibility we include a Dev Container (Python 3.12-slim) that installs the same requirements, and Dockerfiles for
+backend/frontend/train images to pin runtime dependencies in deployment environments.
 
 ### Question 5
 

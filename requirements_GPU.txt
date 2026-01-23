@@ -5,6 +5,7 @@ torchvision==0.24.1
 #torchvision==0.24.1+cpu
 typer==0.21.1
 fastapi==0.128.0
+python-multipart==0.0.12
 uvicorn==0.40.0
 matplotlib>=3.10.0
 dvc[gdrive,gs]==3.66.1
@@ -26,4 +27,7 @@ pytorch-lightning==2.6.0
 requests==2.32.5
 httpx==0.28.1
 locust==2.43.1
-bentoml==1.4.33
+streamlit>=1.28.2
+pandas>=2.1.3
+google-cloud-run>=0.10.5
+anyio>=4.12.1

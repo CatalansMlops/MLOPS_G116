@@ -4,6 +4,7 @@ torch==2.9.1
 torchvision==0.24.1
 typer==0.21.1
 fastapi==0.128.0
+python-multipart==0.0.12
 uvicorn==0.40.0
 matplotlib>=3.10.0
 dvc[gdrive,gs]==3.66.1
