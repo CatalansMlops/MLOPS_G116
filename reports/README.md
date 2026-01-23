@@ -234,7 +234,7 @@ frontend logic) to catch regressions early. Integration tests exercise the FastA
 >
 > Answer:
 
-*Our total coverage is 58% (619 misses out of 1479 statements). The low overall number is mainly driven by the large `main.py` (25%) and `train.py` (21%), which include many branches for profiling, logging, cloud uploads, and W&B setup that are hard to exercise in unit tests. Most other modules are above ~75%, with several in the 90% range (backend,frontend, data_importfromcloud, model, registry_download). We cover all key files, which is valuable even if the aggregate is lower. We generate this with the Invoke task `invoke coverage`. We attempted to upload coverage reports to Codecov, but it was costly/complicated for our setup, so we kept local reports. Even with higher coverage we would not trust the system to be error‑free, since tests reduce risk but cannot cover every runtime or data edge case.*
+*Our total coverage is 58% (619 misses out of 1479 statements). The low overall number is mainly driven by the large `main.py` (25%) and `train.py` (21%), which include many branches for profiling, logging, cloud uploads, and W&B setup that are hard to exercise in unit tests. Most other modules are above ~75%, with several in the 90% range (backend,frontend, data_importfromcloud, model, registry_download). We cover all key files, which is valuable even if the aggregate is lower. We generate this with the Invoke task `invoke coverage`. We attempted to upload coverage reports to Codecov, but it was costly and complicated for our setup, so we kept local reports. Even with higher coverage we would not trust the system to be error‑free, since tests reduce risk but cannot cover every runtime or data edge case.*
 
 ### Question 9
 
@@ -267,7 +267,7 @@ frontend logic) to catch regressions early. Integration tests exercise the FastA
 
 > Answer:
 
->*Yes, we used DVC to manage the data in our project. DVC allowed us to version control large datasets without storing them directly in Git, which would have been inefficient and impractical given the size of the data. By storing the raw dataset in a cloud storage bucket and tracking it through DVC, we were able to maintain a clear and reproducible link between specific versions of the data and the corresponding versions of the code. This improved the reliability and reproducibility of the project, as each experiment or model could be traced back to the exact dataset used. Additionally, DVC enabled efficient collaboration among team members by allowing quick and consistent data synchronization using commands such as -dvc pull-. This ensured that all contributors worked with the same data version, reduced inconsistencies across environments, and simplified the setup process when cloning the repository. Overall, using DVC significantly improved data versioning, reproducibility, and collaboration within the project.*
+>*Yes, we used DVC to manage the data in our project. DVC allowed us to version control large datasets without storing them directly in Git, which would have been inefficient given the size of the data. By storing the raw dataset in a cloud storage bucket and tracking it through DVC, we maintained a reproducible link between versions of the data and the corresponding code. This improved the reliability of the project, as each experiment or model could be traced to the exact dataset used. DVC enabled efficient collaboration among team members by allowing quick and consistent data synchronization using commands such as -dvc pull-. This ensured that all contributors worked with the same data version, reduced inconsistencies across environments, and simplified the setup process when cloning the repository. In containers (Docker/Cloud Run) we avoided dvc push because it requires git metadata and adding `.dvc` files, which is brittle/inefficient inside images. For non data folders like `outputs/` (run artifacts already stored in the bucket) we used direct GCS uploads instead. Locally we used personal credentials, while CI/containers used a service account to grant least privilege access to the bucket; this was essential to automate pulls/uploads and avoid manual logins.*
 
 
 ### Question 11
@@ -285,7 +285,13 @@ frontend logic) to catch regressions early. Integration tests exercise the FastA
 >
 > Answer:
 
---- question 11 fill here ---
+> *Our CI lives in `.github/workflows/` with two pipelines. `tests.yaml` runs on every push/PR and uses a matrix over Ubuntu, Windows, and macOS to catch OS-specific issues. It sets up Python 3.12 (matching our project requirement) and enables pip caching via `actions/setup-python` (keyed on `requirements.txt`, `requirements_dev.txt`, and `pyproject.toml`) to speed up repeat runs. The job installs dependencies, performs an editable install of the package, and runs `pytest tests/`. It also authenticates to GCP when the service‑account secret is present and conditionally performs a `dvc pull`, so integration tests can run with real data while still succeeding on forks where secrets are missing. We set `fail-fast: false` to surface all OS failures in one run. `linting.yaml` is a separate job that installs dependencies and runs `ruff check` plus `ruff format --check` to enforce linting and formatting. We keep a Dependabot config for automated dependency update PRs and a pre-commit config for local checks before pushing. We considered a Python-version matrix, but several dependencies are pinned for 3.12, so we aligned CI with our runtime to avoid incompatibilities. We also tie CI to our branching policy: feature branches must pass these checks before opening a PR to main, keeping the protected default branch stable. Overall, the CI focuses on fast feedback, reproducible installs, and cross‑platform robustness.
+
+>Link to GitHub actions workflows (run IDs):
+>```
+>https://github.com/CatalansMlops/MLOPS_G116/actions/runs/21299897999
+>https://github.com/CatalansMlops/MLOPS_G116/actions/runs/21299897996
+>```*
 
 ## Running code and tracking experiments
 
