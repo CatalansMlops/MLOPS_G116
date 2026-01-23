@@ -365,7 +365,7 @@ registry, tying deployment to a versioned artifact and ensuring traceability fro
 >
 > Answer:
 
-> *We used Docker to standardize experiments and deployments. We maintain multiple images in `dockerfiles/`: a main image for the end‑to‑end pipeline (train+eval+visualize), plus specialized backend/frontend images for Cloud Run and local training/evaluation variants, each with entrypoint scripts. For reproducible local work we also use a Dev Container that mirrors the same Python environment. In the cloud we build/push images via `configs/cloudbuild.yaml` (Cloud Build), or locally and push to Artifact Registry. Example local run:
+> We used Docker to standardize experiments and deployments. We maintain multiple images in `dockerfiles/`: a main image for the end‑to‑end pipeline (train+eval+visualize), plus specialized backend/frontend images for Cloud Run and local training/evaluation variants, each with entrypoint scripts. For reproducible local work we also use a Dev Container that mirrors the same Python environment. In the cloud we build/push images via `configs/cloudbuild.yaml` (Cloud Build), or locally and push to Artifact Registry. Example local run:
 `docker run --rm --env-file .env -v $(pwd)/data:/app/data -v $(pwd)/outputs:/app/outputs main:latest`
 We store secrets in `.env` (e.g., `WANDB_API_KEY`) and, when needed, mount a service‑account JSON and set
 `GOOGLE_APPLICATION_CREDENTIALS` so containers can access GCS/DVC or Vertex AI. We also run Vertex AI jobs using
@@ -374,7 +374,7 @@ We store secrets in `.env` (e.g., `WANDB_API_KEY`) and, when needed, mount a ser
 Link to Dockerfile:
 ```
 https://github.com/CatalansMlops/MLOPS_G116/blob/main/dockerfiles/main.dockerfile
-```*
+```
 
 ### Question 16
 
@@ -389,7 +389,13 @@ https://github.com/CatalansMlops/MLOPS_G116/blob/main/dockerfiles/main.dockerfil
 >
 > Answer:
 
---- question 16 fill here ---
+> We mainly debugged with the VS Code debugger using launch configurations (default.json) for the train/evaluate/
+visualize entrypoints. We set breakpoints, inspected tensors and configs, and used step‑through execution when
+something failed. In practice we did not overuse interactive debugging; we relied more on clear logging (Loguru),
+assertions, and quick reruns, and only switched to the debugger for critical, hard‑to‑trace issues. We also used
+AI-assisted suggestions to speed up diagnosis when errors were non‑obvious.
+
+Profiling was more systematic. We added profiling hooks in most scripts and used the PyTorch profiler with TensorBoard to inspect hotspots and CPU utilization, plus Snakeviz for cProfile output. This was important when training for many epochs or running sweeps, where small inefficiencies are critical. Profiling results were logged with the run outputs to guide targeted optimizations.
 
 ## Working in the cloud
 
