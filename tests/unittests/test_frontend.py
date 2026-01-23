@@ -7,6 +7,7 @@ from mlops_g116 import frontend
 
 # --- Test get_backend_url ---
 
+
 @patch("mlops_g116.frontend.run_v2.ServicesClient")
 def test_get_backend_url_found_in_cloud(mock_client_cls):
     """Test that we find the Cloud Run service URL if it exists."""
@@ -23,6 +24,7 @@ def test_get_backend_url_found_in_cloud(mock_client_cls):
 
     url = frontend.get_backend_url()
     assert url == "https://my-cloud-run-backend.com"
+
 
 @patch("mlops_g116.frontend.run_v2.ServicesClient")
 def test_get_backend_url_fallback_local(mock_client_cls):
@@ -51,6 +53,7 @@ def test_get_backend_url_fallback_local(mock_client_cls):
 
 # --- Test classify_image ---
 
+
 @patch("mlops_g116.frontend.requests.post")
 def test_classify_image_success(mock_post):
     """Test that classify_image returns JSON when status is 200."""
@@ -64,6 +67,7 @@ def test_classify_image_success(mock_post):
 
     assert result == {"predictions": [{"class": "A", "score": 0.9}]}
     mock_post.assert_called_once()
+
 
 @patch("mlops_g116.frontend.requests.post")
 def test_classify_image_failure(mock_post):
@@ -79,12 +83,12 @@ def test_classify_image_failure(mock_post):
 
 # --- Test Main (The Streamlit UI) ---
 
+
 @patch("mlops_g116.frontend.st")
 @patch("mlops_g116.frontend.classify_image")
 @patch("mlops_g116.frontend.get_backend_url")
 def test_main_happy_path(mock_get_url, mock_classify, mock_st):
     """Test the full flow: Upload Image -> Classify -> Show Results."""
-
     # 1. Setup Backend URL
     mock_get_url.return_value = "http://backend"
 
@@ -97,7 +101,7 @@ def test_main_happy_path(mock_get_url, mock_classify, mock_st):
     mock_classify.return_value = {
         "predictions": [
             {"class": "glioma", "score": 0.85},
-            {"class": "meningioma", "score": 0.15}
+            {"class": "meningioma", "score": 0.15},
         ]
     }
 
@@ -126,6 +130,7 @@ def test_main_no_backend_error(mock_get_url, mock_st):
 
     with pytest.raises(ValueError, match="Backend service not found"):
         frontend.main()
+
 
 @patch("mlops_g116.frontend.st")
 @patch("mlops_g116.frontend.classify_image")
