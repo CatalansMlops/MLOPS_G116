@@ -310,7 +310,9 @@ frontend logic) to catch regressions early. Integration tests exercise the FastA
 >
 > Answer:
 
---- question 12 fill here ---
+*We configured experiments with Hydra and the `configs/` tree. `main.py`, `train.py`, `evaluate.py`, and
+`visualize.py` use `@hydra.main` and load `config.yaml`, which composes `model/`, `optimizer/`, and `training/` and
+uses `instantiate` targets. `evaluate.yaml` and `visualize.yaml` redirect to `evaluation/` and `visualization/` while reusing the same model/data components. We override params from the CLI (e.g., `python src/mlops_g116/train.py optimizer.lr=1e-3 training.batch_size=32`) and Hydra stores outputs for reproducibility. We also keep `sweep.yaml` for W&B sweeps. Typer and the debugger (default.json) are only for small utilities.*
 
 ### Question 13
 
@@ -325,7 +327,8 @@ frontend logic) to catch regressions early. Integration tests exercise the FastA
 >
 > Answer:
 
---- question 13 fill here ---
+*Reproducibility relied on Hydra, logging, and consistent runtime environments. We set seeds
+(`torch.manual_seed`) in training/evaluation runs and stored full configs through Hydra outputs, so each run keeps an exact copy of hyperparameters and component choices. We log metrics and artifacts to W&B and locally via Loguru (plus Hydra’s run directory), including confusion matrices, t‑SNE plots, and model checkpoints like `model.pth`. Outputs and profiler traces are kept in the GCS bucket, giving a durable record of each experiment; we also used TensorBoard and Snakeviz to capture performance profiles. For environment reproducibility we used a Dev Container so developers run in a consistent Python 3.12 image, and multiple Dockerfiles for specific tasks (main/train/evaluate/visualize, backend/frontend). We kept variants for local vs cloud runs (CPU, local, cloud), including containers that read data from local processed files, via DVC pulls, or directly from GCS using service‑account credentials. The main container is the reference for hyperparameter optimization and W&B sweeps (`sweep.yaml`), and we can rerun any configuration by pointing to the same config and artifact versions. Together, seeded training, logged configs/artifacts, and containerized environments made experiments repeatable across machines and cloud runs.*
 
 ### Question 14
 
