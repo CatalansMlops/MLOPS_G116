@@ -1,15 +1,15 @@
 import os
+import shutil
 from pathlib import Path
 
-import torch
 import wandb
-
-from mlops_g116.model import TumorDetectionModelSimple
 
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
     load_dotenv = None
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 
 def download_and_load(
@@ -19,15 +19,19 @@ def download_and_load(
     alias: str,
     artifact_dir: Path,
 ) -> Path:
-    """Download a registry artifact and load its weights into the model."""
+    """Download a registry artifact, validate it, and save the checkpoint locally."""
     api = wandb.Api()
     artifact_name = f"{entity}/{registry}/{collection}:{alias}"
     artifact = api.artifact(artifact_name)
     local_dir = Path(artifact.download(root=str(artifact_dir)))
-    model = TumorDetectionModelSimple()
-    state_dict = torch.load(local_dir / "model.pth", map_location="cpu")
-    model.load_state_dict(state_dict)
-    return local_dir
+    model_path = local_dir / "model.pth"
+    if not model_path.exists():
+        raise FileNotFoundError(f"Expected model.pth inside artifact, not found at {model_path}")
+    output_dir = REPO_ROOT / "models"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / "model.pth"
+    shutil.copy2(model_path, output_path)
+    return output_path
 
 
 def main() -> None:
@@ -38,12 +42,12 @@ def main() -> None:
     if not entity:
         raise ValueError("Set WANDB_ENTITY to your W&B entity before running.")
     registry = os.getenv("WANDB_REGISTRY", "wandb-registry-mlops_g116")
-    collection = os.getenv("WANDB_COLLECTION", "mlops_g116")
+    collection = os.getenv("WANDB_COLLECTION_MAIN", "mlops_g116-main-models")
     alias = os.getenv("WANDB_ALIAS", "latest")
     artifact_dir = Path(os.getenv("WANDB_ARTIFACT_DIR", "artifacts/registry_model"))
-    local_dir = download_and_load(entity, registry, collection, alias, artifact_dir)
-    print(f"Loaded model from: {local_dir}")
+    output_path = download_and_load(entity, registry, collection, alias, artifact_dir)
+    print(f"Saved model checkpoint to: {output_path}")
 
 
 if __name__ == "__main__":
-    main()  
+    main()

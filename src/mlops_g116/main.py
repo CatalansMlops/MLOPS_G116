@@ -10,15 +10,16 @@ import webbrowser
 from pathlib import Path
 
 import hydra
-from loguru import logger
 import matplotlib.pyplot as plt
+import torch
+import wandb
+from google.cloud import storage
+from loguru import logger
 from omegaconf import DictConfig, OmegaConf
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.metrics import RocCurveDisplay, accuracy_score, f1_score, precision_score, recall_score
-import torch
-import wandb
-from google.cloud import storage
+
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -26,17 +27,14 @@ except ModuleNotFoundError:
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
+
 from mlops_g116.data import load_data
 
 # Select the best available device:
 # - CUDA if an NVIDIA GPU is available
 # - MPS for Apple Silicon
 # - CPU otherwise
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 CONFIG_DIR = Path(__file__).resolve().parents[2] / "configs"
 DEFAULT_OUTPUT_BUCKET = "mlops116"
@@ -110,6 +108,7 @@ def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
                 return port
     return preferred_port
 
+
 def _is_port_open(port: int) -> bool:
     """Check whether a local TCP port is accepting connections.
 
@@ -121,6 +120,7 @@ def _is_port_open(port: int) -> bool:
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         return sock.connect_ex(("127.0.0.1", port)) == 0
+
 
 def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: bool) -> None:
     """Start TensorBoard for the run directory if available.
@@ -271,9 +271,7 @@ def main(config: DictConfig) -> None:
     if hasattr(model, "fc1"):
         logger.info(f"Model output classes: {model.fc1.out_features}")
     # Wrap dataset into a DataLoader to iterate in mini-batches
-    train_dataloader = torch.utils.data.DataLoader(
-        train_set, batch_size=hparams.batch_size
-    )
+    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=hparams.batch_size)
 
     # Standard loss function for multi-class classification
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -317,12 +315,7 @@ def main(config: DictConfig) -> None:
 
                 statistics["train_loss"].append(loss.item())
 
-                batch_accuracy = (
-                    (y_pred.argmax(dim=1) == target)
-                    .float()
-                    .mean()
-                    .item()
-                )
+                batch_accuracy = (y_pred.argmax(dim=1) == target).float().mean().item()
                 epoch_loss += loss.item()
                 epoch_acc += batch_accuracy
                 num_batches += 1
@@ -354,7 +347,7 @@ def main(config: DictConfig) -> None:
                         wandb.log({"train/images": images})
 
                         grads = torch.cat([p.grad.flatten() for p in model.parameters() if p.grad is not None], 0)
-                        #wandb.log({"train/gradients": wandb.Histogram(grads)})
+                        # wandb.log({"train/gradients": wandb.Histogram(grads)})
                         wandb.log({"train/gradients": wandb.Histogram(grads.detach().cpu())})
 
                 prof.step()
@@ -590,6 +583,7 @@ def main(config: DictConfig) -> None:
         logger.warning(f"Failed to upload outputs to GCS: {exc}")
     if wandb_enabled:
         wandb.finish()
+
 
 if __name__ == "__main__":
     main()

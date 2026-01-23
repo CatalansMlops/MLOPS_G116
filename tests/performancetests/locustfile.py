@@ -1,7 +1,9 @@
-import random
 import io
+import random
+
 from locust import HttpUser, between, task
 from PIL import Image
+
 
 class BackendUser(HttpUser):
     """Simulates a user interacting with the backend API."""
@@ -24,18 +26,16 @@ class BackendUser(HttpUser):
     @task(3)
     def classify_image(self) -> None:
         """Upload a dummy image to the classification endpoint."""
-        
+
         # 1. Generate a small in-memory dummy image (100x100 grayscale)
         # This prevents needing a real file on disk
-        img = Image.new('L', (224, 224), color=random.randint(0, 255))
+        img = Image.new("L", (224, 224), color=random.randint(0, 255))
         img_byte_arr = io.BytesIO()
-        img.save(img_byte_arr, format='JPEG')
+        img.save(img_byte_arr, format="JPEG")
         img_byte_arr.seek(0)
 
         # 2. Define the payload matching your FastAPI endpoint (file=...)
-        files = {
-            "file": ("perf_test.jpg", img_byte_arr, "image/jpeg")
-        }
+        files = {"file": ("perf_test.jpg", img_byte_arr, "image/jpeg")}
 
         # 3. Send the POST request
         # We catch the response to mark it as failure if valid JSON isn't returned

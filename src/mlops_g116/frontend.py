@@ -6,7 +6,7 @@ import streamlit as st
 from google.cloud import run_v2
 
 
-@st.cache_resource  
+@st.cache_resource
 def get_backend_url():
     """Get the URL of the backend service."""
     parent = "projects/dtumlops-484509/locations/europe-west1"
@@ -16,9 +16,10 @@ def get_backend_url():
         if service.name.split("/")[-1] == "my-backend-image":
             print(service.uri)
             return service.uri
-        
+
     # Fallback to local environment variable if not found
     return os.environ.get("BACKEND", "http://127.0.0.1:8000")
+
 
 def classify_image(image, backend):
     """Send the image to the backend for classification."""
@@ -50,7 +51,7 @@ def main() -> None:
 
             # Display Image
             st.image(image, caption="Uploaded Image")
-            
+
             # Display Text Prediction (The first one is the best one)
             best_class = predictions[0]["class"]
             best_score = predictions[0]["score"]
@@ -58,11 +59,11 @@ def main() -> None:
 
             # Create DataFrame directly from the clean list
             df = pd.DataFrame(predictions)
-            
+
             # Rename columns to match Streamlit expects
-            df.columns = ["Class", "Probability"] 
+            df.columns = ["Class", "Probability"]
             df.set_index("Class", inplace=True)
-            
+
             # Plot
             st.bar_chart(df, y="Probability")
         else:

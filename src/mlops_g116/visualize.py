@@ -9,15 +9,16 @@ import webbrowser
 from pathlib import Path
 
 import hydra
+import matplotlib.pyplot as plt
+import torch
+import wandb
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from loguru import logger
-import matplotlib.pyplot as plt
 from omegaconf import DictConfig, OmegaConf
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-import torch
-import wandb
+
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -260,9 +261,11 @@ def visualize(config: DictConfig) -> None:
     if wandb_enabled:
         wandb.finish()
 
+
 def main() -> None:
     """Run the Hydra training entrypoint."""
     visualize()
+
 
 if __name__ == "__main__":
     main()

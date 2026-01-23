@@ -10,14 +10,15 @@ import webbrowser
 from pathlib import Path
 
 import hydra
+import matplotlib.pyplot as plt
+import torch
+import wandb
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from loguru import logger
-import matplotlib.pyplot as plt
 from omegaconf import DictConfig, OmegaConf
 from sklearn.metrics import ConfusionMatrixDisplay, accuracy_score, f1_score, precision_score, recall_score
-import torch
-import wandb
+
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -256,9 +257,11 @@ def evaluate(config: DictConfig) -> None:
     if wandb_enabled:
         wandb.finish()
 
+
 def main() -> None:
     """Run the Hydra evaluation entrypoint."""
     evaluate()
+
 
 if __name__ == "__main__":
     evaluate()
