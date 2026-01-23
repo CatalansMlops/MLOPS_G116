@@ -123,7 +123,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
-Group 116
+>Group 116
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -134,7 +134,7 @@ Group 116
 >
 > Answer:
 
-> *s254311, s253742, s253749*---
+> *s254311, s253742, s253749*
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -168,11 +168,7 @@ Group 116
 >
 > Answer:
 
-> We managed dependencies with pip and pinned requirements files stored in the repo, which were created using "pip freeze" and "pipreqs". `requirements.txt` contains runtime packages and `requirements_dev.txt` adds test, lint, and docs tools; `pyproject.toml` exposes these as dynamic dependencies for editable installs. A new member can reproduce the environment by cloning the repo, creating a Python
-3.12 conda environment, activating it, upgrading pip/setuptools/wheel, then running `pip install -r requirements.txt` and `pip install -e .`; for development tooling, add `pip install -e .[dev]`. We also provide Invoke tasks in `tasks.py`
-(`invoke create_environment`, `invoke requirements`, `invoke dev_requirements`) to standardize these steps. For extra
-reproducibility we include a Dev Container (Python 3.12-slim) that installs the same requirements, and Dockerfiles for
-backend/frontend/train images to pin runtime dependencies in deployment environments.
+>*We used Conda to manage all our project dependencies and ensure that the development environment is consistent across different machines. The list of dependencies was automatically generated using pip freeze to capture the exact versions of all Python packages installed during development. To replicate the development environment exactly, a new team member would need to follow these steps: 1) git clone <repository> to get a local copy of the project, 2) pip install invoke to install the task runner we use for automating setup commands, 3) invoke conda, which creates a Conda environment and installs all packages listed in both requirements.txt and requirements_dev.txt, ensuring that the environment matches exactly what the team uses, and 4) invoke gcloud, which runs gcloud auth application-default login to authenticate with Google Cloud Platform and grant the necessary permissions to access the dtu_mlops project. After completing these steps, the new team member will have a fully functional development environment with all dependencies installed and properly configured, including access to cloud resources needed for the project.*
 
 ### Question 5
 
@@ -188,7 +184,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 >
 > Answer:
 
---- question 5 fill here ---
+>*From the cookiecutter template, we have filled out the src, tests and docs folders. In the src folder, we implemented the main modules of our project, including data processing, model training and evaluation. The tests folder contains unit tests for each module to ensure correctness and reliability. We have removed the notebooks folder because we did not use Jupyter notebooks in this project, as all our experiments are run through scripts. Additionally, we added an experiments folder that contains configuration files and scripts for executing and tracking different experiment runs. This helps maintain reproducibility and allows easy modification of parameters. We also customized the README.md to include project motivation, a summary of the results, and instructions on how to run the code. Overall, the project adheres to the cookiecutter structure while incorporating specific folders and files that support our workflow efficiently.*
 
 ### Question 6
 
@@ -203,8 +199,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 >
 > Answer:
 
-*We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These*
-> *concepts are important in larger projects because ... . For example, typing ...*
+>*We used Ruff for linting and Black for formatting. We also used type hints for typing and docstrings for documentation. These concepts are important in larger projects because they ensure code is consistent, readable, and maintainable, which reduces bugs and makes collaboration easier. For example, typing makes the expected inputs and outputs of functions explicit, helping developers understand how to use them correctly and allowing tools to catch errors before runtime. Documentation, on the other hand, explains the purpose and behavior of modules and functions, which is especially useful when multiple developers work on the same project or when new team members join. Overall, these practices improve reliability, facilitate debugging, and make large codebases easier to scale and maintain.*
 
 ## Version control
 
@@ -223,7 +218,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 >
 > Answer:
 
-*In total we have implemented 3 tests. Primarily we are testing the data/raw folder structrue and images, the... and ... as these the most critical parts of our*
+>*In total we have implemented 3 tests. Primarily we are testing the data/raw folder structrue and images, the... and ... as these the most critical parts of our*
 > *application but also ... .*
 
 ### Question 8
@@ -254,7 +249,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 >
 > Answer:
 
-*We made use of both branches and pull requests (PRs) in our project. Each group member worked on their own branch. On the remote repository, we had four branches (main and three personal branches), while locally each member had two branches (main and their personal branch). When it was time to upload changes, we added, committed, and pushed the personal branch. After GitHub Actions passed all tests, we opened a pull request to merge the personal branch into main. Once the tests passed again, we authorized the merge and pulled main locally. Pull requests helped improve version control by enforcing code reviews and automated testing before any changes were merged into the main branch. This ensured that new features or fixes were validated, reduced the risk of introducing errors, and maintained a clear and traceable history of changes. This workflow allowed us to resolve issues without affecting the protected main branch.*
+>*We made use of both branches and pull requests (PRs) in our project. Each group member worked on their own branch. On the remote repository, we had four branches (main and three personal branches), while locally each member had two branches (main and their personal branch). When it was time to upload changes, we added, committed, and pushed the personal branch. After GitHub Actions passed all tests, we opened a pull request to merge the personal branch into main. Once the tests passed again, we authorized the merge and pulled main locally. Pull requests helped improve version control by enforcing code reviews and automated testing before any changes were merged into the main branch. This ensured that new features or fixes were validated, reduced the risk of introducing errors, and maintained a clear and traceable history of changes. This workflow allowed us to resolve issues without affecting the protected main branch.*
 
 
 ### Question 10
@@ -272,7 +267,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 
 > Answer:
 
-*Yes, we used DVC to manage the data in our project. DVC allowed us to version control large datasets without storing them directly in Git, which would have been inefficient and impractical given the size of the data. By storing the raw dataset in a cloud storage bucket and tracking it through DVC, we were able to maintain a clear and reproducible link between specific versions of the data and the corresponding versions of the code. This improved the reliability and reproducibility of the project, as each experiment or model could be traced back to the exact dataset used. Additionally, DVC enabled efficient collaboration among team members by allowing quick and consistent data synchronization using commands such as -dvc pull-. This ensured that all contributors worked with the same data version, reduced inconsistencies across environments, and simplified the setup process when cloning the repository. Overall, using DVC significantly improved data versioning, reproducibility, and collaboration within the project.*
+>*Yes, we used DVC to manage the data in our project. DVC allowed us to version control large datasets without storing them directly in Git, which would have been inefficient and impractical given the size of the data. By storing the raw dataset in a cloud storage bucket and tracking it through DVC, we were able to maintain a clear and reproducible link between specific versions of the data and the corresponding versions of the code. This improved the reliability and reproducibility of the project, as each experiment or model could be traced back to the exact dataset used. Additionally, DVC enabled efficient collaboration among team members by allowing quick and consistent data synchronization using commands such as -dvc pull-. This ensured that all contributors worked with the same data version, reduced inconsistencies across environments, and simplified the setup process when cloning the repository. Overall, using DVC significantly improved data versioning, reproducibility, and collaboration within the project.*
 
 
 ### Question 11
@@ -388,8 +383,7 @@ backend/frontend/train images to pin runtime dependencies in deployment environm
 >
 > Answer:
 
-*We used the following two services: Cloud Build, Artifact Registry, Cloud Run, Compute Engine, Vertex AI and Cloud Storage (Bucket).
-Cloud Build is for building the images (via trigger) and pushing them to the Artifact Registry, where the containers are stored and CLoud Run runns them. Engine and Vertex AI are used to train the models (using CPU to increase the speed). Bucket is used to store the dataset in the cloud.*
+> *We used the following Google Cloud services: Cloud Build, Artifact Registry, Cloud Run, Compute Engine, Vertex AI and Cloud Storage (Bucket). Cloud Build handles building Docker images whenever a trigger occurs and pushes them to Artifact Registry, where the containers are securely stored. Cloud Run then deploys and runs these containers, making the application publicly accessible. Compute Engine and Vertex AI are used to train our machine learning models, leveraging CPU resources to increase training speed. Finally, Cloud Storage (Bucket) is used to store the dataset in the cloud, ensuring easy access, version control and scalability. Together, these services provide a fully automated, efficient, and reliable pipeline for building, deploying and training our application in the cloud.*
 
 ### Question 18
 
@@ -446,7 +440,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
-*We managed to train our model in the cloud using Vertex AI. To do this, we created an actionable trigger (vertex_ai_train.yaml) that could be executed manually from Google Cloud Build. Once the container was pushed to the Artifact Registry, we started training our model. We chose Vertex AI over using a Compute Engine because Vertex AI provides a higher-level, managed environment specifically designed for machine learning workflows. It simplifies tasks such as resource provisioning, scaling, experiment tracking and monitoring. Unlike Compute Engine, where we would have had to manually configure virtual machines, install dependencies, and manage GPU resources, Vertex AI allowed us to train models quickly and reliably with minimal setup. This made the training process faster, less error-prone, and easier to reproduce, which was particularly beneficial for our team workflow.*
+> *We managed to train our model in the cloud using Vertex AI. To do this, we created an actionable trigger (vertex_ai_train.yaml) that could be executed manually from Google Cloud Build. Once the container was pushed to the Artifact Registry, we started training our model. We chose Vertex AI over using a Compute Engine because Vertex AI provides a higher-level, managed environment specifically designed for machine learning workflows. It simplifies tasks such as resource provisioning, scaling, experiment tracking and monitoring. Unlike Compute Engine, where we would have had to manually configure virtual machines, install dependencies, and manage GPU resources, Vertex AI allowed us to train models quickly and reliably with minimal setup. This made the training process faster, less error-prone, and easier to reproduce, which was particularly beneficial for our team workflow.*
 
 ## Deployment
 
@@ -480,7 +474,7 @@ We developed an API for our model using FastAPI. The API consists of a root endp
 >
 > Answer:
 
-*We successfully deployed our API both locally (running it via the command line and containerized with docker run) and in the cloud using Google Cloud Run. To deploy to the cloud, we created a Dockerfile (backend.dockerfile) that sets up the necessary environment and dependencies. After building the Docker image, we tagged and pushed it to Google Cloud Artifact Registry. Then, we deployed the image to Cloud Run, configuring the service with unauthenticated access and assigning it sufficient memory resources (2GB). Cloud Run automatically provided a public URL for our API. To invoke the deployed API, you can run the following command: `curl -X POST "https://backend-277552599633.europe-west1.run.app/classify/"   -H "accept: application/json"   -F "file=@path_to_image.jpg;type=image/jpeg"`. Additonally, we set up continuous deployment using Google Cloud Build with the `cloudbuild.yaml`, which automatically builds and deploys the Docker image whenever changes are pushed to the main branch of our GitHub repository.*
+> *We successfully deployed our API both locally (running it via the command line and containerized with docker run) and in the cloud using Google Cloud Run. To deploy to the cloud, we created a Dockerfile (backend.dockerfile) that sets up the necessary environment and dependencies. After building the Docker image, we tagged and pushed it to Google Cloud Artifact Registry. Then, we deployed the image to Cloud Run, configuring the service with unauthenticated access and assigning it sufficient memory resources (2GB). Cloud Run automatically provided a public URL for our API. To invoke the deployed API, you can run the following command: `curl -X POST "https://backend-277552599633.europe-west1.run.app/classify/"   -H "accept: application/json"   -F "file=@path_to_image.jpg;type=image/jpeg"`. Additonally, we set up continuous deployment using Google Cloud Build with the `cloudbuild.yaml`, which automatically builds and deploys the Docker image whenever changes are pushed to the main branch of our GitHub repository.*
 
 ### Question 25
 
@@ -496,6 +490,7 @@ We developed an API for our model using FastAPI. The API consists of a root endp
 > Answer:
 
 *We implemented integration tests with Pytest that test how different components (FastAPI, PyTorch model, file handling) work together in the API. The tests verify the API is alive and reachable and validate the full machine learning inference pipeline: they confirm the loading of the PyTorch model, weights, and transforms into memory without crashing, test if the API accepts standard file uploads, verify that the model actually runs on the input and produces an output, and check that the output JSON contains the correct keys and returns exactly 4 classes. For load testing, we created a locustfile that simulates sending POST requests with image files to the /classify endpoint. We tested three scenarios: 1, 5, and 20 concurrent users. While performance remained stable at 1 and 5 users with no latency degradation, at 20 users, the system reached 7.0 RPS and began failing (significantly increased latency). In conclusion, our current Cloud Run deployment (1 CPU, 2GB RAM) supports relatively low traffic volumes. To increase capacity, we could increase the number of CPUs assigned to the service and, consequently, the number of workers running the API to utilize those CPUs.*
+> *We implemented integration tests with Pytest that test how different components (FastAPI, PyTorch model, file handling) work together in the API. The tests verify the API is alive and reachable and validate the full machine learning inference pipeline: they confirm the loading of the PyTorch model, weights, and transforms into memory without crashing, test if the API accepts standard file uploads, verify that the model actually runs on the input and produces an output, and check that the output JSON contains the correct keys and returns exactly 4 classes. For load testing, we created a locustfile that simulates sending POST requests with image files to the /classify endpoint. We tested three scenarios: 1, 5, and 20 concurrent users. While performance remained stable at 1 and 5 users with no latency degradation, at 20 users, the system reached 7.0 RPS and began failing (resulting in 3 dropped requests and significantly increased latency). In conclusion, our current Cloud Run deployment (1 CPU, 2GB RAM) supports relatively low traffic volumes. To increase capacity, we could increase the number of CPUs assigned to the service and, consequently, the number of workers running the API to utilize those CPUs.*
 
 
 ### Question 26
@@ -511,8 +506,7 @@ We developed an API for our model using FastAPI. The API consists of a root endp
 >
 > Answer:
 
-We did not manage to implement monitoring for our deployed model. However, implementing monitoring would be important for ensuring the reliability of our application. Monitoring would allow us to track key performance metrics such as response times, error rates, and system resource usage (CPU, memory). These metrics would help us identify potential bottlenecks or failures in the system.
-Regarding the detection of distribution shifts, target drift is a more practical strategy than data drift for our project. While detecting drift in images requires complex, resource-heavy feature extraction, target drift simply analyzes the model's outputs. Any significant shift in the distribution of predicted classes could serve as an indicator of potential model failure.
+> *We did not manage to implement monitoring for our deployed model. However, implementing monitoring would be important for ensuring the reliability of our application. Monitoring would allow us to track key performance metrics such as response times, error rates, and system resource usage (CPU, memory). These metrics would help us identify potential bottlenecks or failures in the system. For our project, target drift is a more practical strategy than data drift. While detecting drift in images requires complex, resource-heavy feature extraction, target drift simply analyzes the model's outputs. Any significant shift in the distribution of predicted classes could serve as an indicator of potential model failure.*
 
 ## Overall discussion of project
 
@@ -531,7 +525,7 @@ Regarding the detection of distribution shifts, target drift is a more practical
 >
 > Answer:
 
-*In total, we used kr130 out of kr8,237 available for our project. The most expensive service was Container Registry Vulnerability Scanning, which cost kr104, followed by Vertex AI and Cloud Run, each costing kr6, and Compute Engine and Artifact Registry, each costing kr4. Overall, working in the cloud was a very positive experience. It provided scalability, flexibility, and easy access to powerful computing resources without the need to maintain physical hardware. Services like Vertex AI and Cloud Run simplified deployment, automated resource management and allowed us to focus on developing and testing our model rather than managing infrastructure. However, there are some drawbacks. Cloud costs can increase quickly if resources are not managed carefully and understanding all the services and their configurations can be overwhelming at first. Despite these challenges, the advantages of speed, reproducibility, collaboration and low maintenance made cloud computing an excellent choice for our project.*
+> *In total, we used kr130 out of kr8,237 available for our project. The most expensive service was Container Registry Vulnerability Scanning, which cost kr104, followed by Vertex AI and Cloud Run, each costing kr6, and Compute Engine and Artifact Registry, each costing kr4. Overall, working in the cloud was a very positive experience. It provided scalability, flexibility, and easy access to powerful computing resources without the need to maintain physical hardware. Services like Vertex AI and Cloud Run simplified deployment, automated resource management and allowed us to focus on developing and testing our model rather than managing infrastructure. However, there are some drawbacks. Cloud costs can increase quickly if resources are not managed carefully and understanding all the services and their configurations can be overwhelming at first. Despite these challenges, the advantages of speed, reproducibility, collaboration and low maintenance made cloud computing an excellent choice for our project.*
 
 ### Question 28
 
@@ -547,7 +541,7 @@ Regarding the detection of distribution shifts, target drift is a more practical
 >
 > Answer:
 
-*We implemented a frontend for our API using Streamlit. The frontend allows users to easily upload images and view the model's predictions in a user-friendly interface.  Users can upload an image, and upon submission, the frontend sends the image to the backend API (classify endpoint) for classification. The predictions are then displayed on the same page, providing immediate feedback to the user. The frontend is also containerized and deployed in Google Cloud Run and is publicly accessible in https://frontend-277552599633.europe-west1.run.app.*
+> *We implemented a frontend for our API using Streamlit. The frontend allows users to easily upload images and view the model's predictions in a user-friendly interface.  Users can upload an image, and upon submission, the frontend sends the image to the backend API (classify endpoint) for classification. The predictions are then displayed on the same page, providing immediate feedback to the user. The frontend is also containerized and deployed in Google Cloud Run and is publicly accessible in https://frontend-277552599633.europe-west1.run.app.*
 
 ### Question 29
 
@@ -566,7 +560,15 @@ Regarding the detection of distribution shifts, target drift is a more practical
 
 ![Pipeline](figures/pipeline.png)
 
-*We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatically triggers builds and deployments whenever we do a push in the main branch of the GitHub repository. The Cloud Build service builds and pushes the Docker images to Google Cloud Artifact Registry and then it deploys the backend and frontend images to Google Cloud Run, making them publicly accessible.*
+> *We have implemented a fully automated CI/CD pipeline using a cloudbuild.yaml configuration file, designed to streamline the process of building, testing and deploying our application. Whenever changes are pushed to the main branch of our GitHub repository, the pipeline is automatically triggered. The Cloud Build service then takes over, building the Docker images for both the backend and frontend, and pushing them to Google Cloud Artifact Registry. Once the images are available, they are deployed to Google Cloud Run, making the application publicly accessible to users via a simple web interface.*
+
+>*The web application allows users to upload MRI brain images and receive real-time feedback regarding their classification. To ensure data integrity and reproducibility, all uploaded files are stored in a Google Cloud Bucket and can also be downloaded locally using DVC, enabling robust version control over the dataset. The data.py script is responsible for processing these images, transforming .jpg files into tensors suitable for model inference and further analysis.*
+
+>*To simplify the setup of development environments and the management of permissions, we created several helper functions in tasks.py. These functions automate repetitive tasks and reduce the time required for initial configuration, making it easier for team members to get started or maintain the system*
+
+>*In addition to the Cloud Build pipeline, we have integrated GitHub Actions workflows that run automatically for every push. These workflows execute unit tests, verifying that all components of the application function correctly and ensuring that any new changes do not introduce errors.*
+
+>*Overall, this CI/CD setup provides a fully automated, end-to-end workflow for deploying a machine learning application. It covers everything from code integration and containerization to deployment and testing, all while ensuring data versioning, reproducibility, and ease of use. This infrastructure allows users to seamlessly interact with the application, upload MRI images and receive immediate, reliable feedback on their classification results.*
 
 ### Question 30
 
@@ -581,7 +583,7 @@ Regarding the detection of distribution shifts, target drift is a more practical
 > Answer:
 
 TO DO: completaaar(feel free de borrar el que vulgueu)
-*One of the main problems was setting up the CI/CD pipeline. We encountered several issues with permissions, authentication and configurations in Google Cloud Build and Cloud Run.
+>*One of the main problems was setting up the CI/CD pipeline. We encountered several issues with permissions, authentication and configurations in Google Cloud Build and Cloud Run.
 During deployment of frontend and backend services to Cloud Run, we faced challenges related to memory allocation and service accessibility. Initially, the backend service was allocated only 512MB of memory, which proved insufficient for loading the machine learning model, leading to crashes. We resolved this by increasing the memory allocation to 2GB, ensuring stable operation.*
 
 ### Question 31
@@ -600,4 +602,6 @@ During deployment of frontend and backend services to Cloud Run, we faced challe
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-*Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.*
+>*Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.*
+>*Student s253749 focused on GCP. This included creating a Google Cloud Storage bucket, implementing the DVC connection, managing IAM and the service account, and triggering workflows in Google Cloud Build. Also adapted the data.py file so that the .jpg images could be converted to tensors*
+>*We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot and Codex to help write some of our code.*
