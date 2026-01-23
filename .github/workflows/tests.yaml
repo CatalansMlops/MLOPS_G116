@@ -16,11 +16,19 @@ jobs:
       matrix:
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
+
     steps:
     - name: Checkout
       uses: actions/checkout@v5
       with:
         fetch-depth: 2
+
+    - uses: iterative/setup-dvc@v1
+
+    - name: Get data
+      run: dvc pull
+      env:
+        GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
 
     - name: Setup Python
       uses: actions/setup-python@v5
