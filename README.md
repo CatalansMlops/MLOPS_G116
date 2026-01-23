@@ -33,52 +33,92 @@ We will be using the **Brain Tumor MRI Dataset** aggregated from multiple open-s
 
 The directory structure of the project looks like this:
 ```txt
-├── .github/                  # Github actions and dependabot
+├── .devcontainer/            # VS Code Dev Container config
+│   ├── devcontainer.json
+│   └── Dockerfile
+├── .dvc/                     # DVC metadata
+├── .github/                  # CI workflows and Dependabot
+│   ├── agents/
+│   ├── prompts/
 │   ├── dependabot.yaml
 │   └── workflows/
+│       ├── linting.yaml
 │       └── tests.yaml
-├── configs/                  # Configuration files
-├── data/                     # Data directory
-│   ├── processed
-│   └── raw
-|       └── brain_dataset     # Brain Tumor MRI Dataset
-|           └── Training
-|           └── Testing
-├── dockerfiles/              # Dockerfiles
-│   ├── api.Dockerfile
-│   └── main.Dockerfile
-|   └── frontend.Dockerfile
-|   └── backend.Dockerfile
-├── docs/                     # Documentation
-│   ├── mkdocs.yml
+├── configs/                  # Hydra configs (training/eval/visualize/sweeps)
+│   ├── cloudbuild.yaml
+│   ├── config.yaml
+│   ├── dataset/
+│   ├── model/
+│   ├── optimizer/
+│   ├── training/
+│   ├── evaluation/
+│   ├── visualization/
+│   ├── vertex/
+│   ├── sweep.yaml
+│   ├── evaluate.yaml
+│   └── visualize.yaml
+├── data/                     # Data tracked with DVC
+│   ├── raw/                  # Raw dataset
+│   ├── processed/            # Processed tensors
+│   ├── raw.dvc
+│   └── processed.dvc
+├── dockerfiles/              # Docker build targets
+│   ├── api.dockerfile
+│   ├── backend.dockerfile
+│   ├── frontend.dockerfile
+│   ├── main.dockerfile
+│   ├── main.CPU.dockerfile
+│   ├── main.local.dockerfile
+│   ├── train.dockerfile
+│   ├── train.local.dockerfile
+│   ├── evaluate.dockerfile
+│   ├── visualize.dockerfile
+│   ├── wandb.dockerfile
+│   └── *_entrypoint.sh
+├── docs/                     # MkDocs documentation
+│   ├── mkdocs.yaml
 │   └── source/
-│       └── index.md
-├── models/                   # Trained models
-├── notebooks/                # Jupyter notebooks
-├── reports/                  # Reports
+│       ├── index.md
+│       └── cloud_deployment.md
+├── models/                   # Optimal trained model artifacts
+│   └── model.pth
+├── outputs/                  # Hydra run outputs (dated folders)
+├── reports/                  # Exam report and generator, and final figures from evaluation and visualization
+│   ├── README.md
+│   ├── report.html
+│   ├── report.py
 │   └── figures/
-├── src/                      # Source code
-│   ├── project_name/
-│   │   ├── __init__.py
-│   │   ├── api.py
-│   │   ├── data.py
-│   │   ├── evaluate.py
-│   │   ├── models.py
-│   │   ├── train.py
-│   │   └── visualize.py
-└── tests/                    # Tests
-│   ├── __init__.py
-│   ├── test_api.py
-│   ├── test_data.py
-│   └── test_model.py
+├── src/                      # Python package
+│   └── mlops_g116/
+│       ├── __init__.py
+│       ├── backend.py
+│       ├── frontend.py
+│       ├── data.py
+│       ├── data_importfromcloud.py
+│       ├── train.py
+│       ├── train_boilerplate.py
+│       ├── evaluate.py
+│       ├── visualize.py
+│       ├── main.py
+│       ├── model.py
+│       ├── model_boilerplate.py
+│       ├── sweep_runner.py
+│       └── registry_download.py
+├── tests/                    # Unit/integration/performance tests
+│   ├── unittests/
+│   ├── integrationtests/
+│   └── performancetests/
+├── .dvcignore
+├── .gcloudignore
 ├── .gitignore
-├── .pre-commit-config.yaml
+├── .pre-commit-config.yaml   # Pre-commit hooks
+├── .python-version
+├── AGENTS.md
 ├── LICENSE
-├── pyproject.toml            # Python project file
-├── README.md                 # Project README
-├── requirements.txt          # Project requirements
-├── requirements_dev.txt      # Development requirements
-└── tasks.py                  # Project tasks
+├── pyproject.toml            # Project metadata
+├── requirements*.txt         # Dependency pins
+├── tasks.py                  # Invoke tasks
+└── README.md                 # Project overview
 ```
 
 
