@@ -123,7 +123,7 @@ will check the repositories and the code to verify your answers.
 >
 > Answer:
 
-Group 116
+>Group 116
 
 ### Question 2
 > **Enter the study number for each member in the group**
@@ -134,7 +134,7 @@ Group 116
 >
 > Answer:
 
-*s254311, s253742, s253749*---
+>*s254311, s253742, s253749*---
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -199,8 +199,7 @@ Group 116
 >
 > Answer:
 
-*We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These*
-> *concepts are important in larger projects because ... . For example, typing ...*
+>*We used Ruff for linting and Black for formatting. We also used type hints for typing and docstrings for documentation. These concepts are important in larger projects because they ensure code is consistent, readable, and maintainable, which reduces bugs and makes collaboration easier. For example, typing makes the expected inputs and outputs of functions explicit, helping developers understand how to use them correctly and allowing tools to catch errors before runtime. Documentation, on the other hand, explains the purpose and behavior of modules and functions, which is especially useful when multiple developers work on the same project or when new team members join. Overall, these practices improve reliability, facilitate debugging, and make large codebases easier to scale and maintain.*
 
 ## Version control
 
@@ -384,8 +383,7 @@ Group 116
 >
 > Answer:
 
-> *We used the following two services: Cloud Build, Artifact Registry, Cloud Run, Compute Engine, Vertex AI and Cloud Storage (Bucket).
-Cloud Build is for building the images (via trigger) and pushing them to the Artifact Registry, where the containers are stored and CLoud Run runns them. Engine and Vertex AI are used to train the models (using CPU to increase the speed). Bucket is used to store the dataset in the cloud.*
+> *We used the following Google Cloud services: Cloud Build, Artifact Registry, Cloud Run, Compute Engine, Vertex AI and Cloud Storage (Bucket). Cloud Build handles building Docker images whenever a trigger occurs and pushes them to Artifact Registry, where the containers are securely stored. Cloud Run then deploys and runs these containers, making the application publicly accessible. Compute Engine and Vertex AI are used to train our machine learning models, leveraging CPU resources to increase training speed. Finally, Cloud Storage (Bucket) is used to store the dataset in the cloud, ensuring easy access, version control and scalability. Together, these services provide a fully automated, efficient, and reliable pipeline for building, deploying and training our application in the cloud.*
 
 ### Question 18
 
@@ -561,7 +559,15 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 
 ![Pipeline](figures/pipeline.png)
 
-> *We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatically triggers builds and deployments whenever we do a push in the main branch of the GitHub repository. The Cloud Build service builds and pushes the Docker images to Google Cloud Artifact Registry and then it deploys the backend and frontend images to Google Cloud Run, making them publicly accessible.*
+> *We have implemented a fully automated CI/CD pipeline using a cloudbuild.yaml configuration file, designed to streamline the process of building, testing and deploying our application. Whenever changes are pushed to the main branch of our GitHub repository, the pipeline is automatically triggered. The Cloud Build service then takes over, building the Docker images for both the backend and frontend, and pushing them to Google Cloud Artifact Registry. Once the images are available, they are deployed to Google Cloud Run, making the application publicly accessible to users via a simple web interface.*
+
+>*The web application allows users to upload MRI brain images and receive real-time feedback regarding their classification. To ensure data integrity and reproducibility, all uploaded files are stored in a Google Cloud Bucket and can also be downloaded locally using DVC, enabling robust version control over the dataset. The data.py script is responsible for processing these images, transforming .jpg files into tensors suitable for model inference and further analysis.*
+
+>*To simplify the setup of development environments and the management of permissions, we created several helper functions in tasks.py. These functions automate repetitive tasks and reduce the time required for initial configuration, making it easier for team members to get started or maintain the system*
+
+>*In addition to the Cloud Build pipeline, we have integrated GitHub Actions workflows that run automatically for every push. These workflows execute unit tests, verifying that all components of the application function correctly and ensuring that any new changes do not introduce errors.*
+
+>*Overall, this CI/CD setup provides a fully automated, end-to-end workflow for deploying a machine learning application. It covers everything from code integration and containerization to deployment and testing, all while ensuring data versioning, reproducibility, and ease of use. This infrastructure allows users to seamlessly interact with the application, upload MRI images and receive immediate, reliable feedback on their classification results.*
 
 ### Question 30
 
@@ -596,3 +602,5 @@ During deployment of frontend and backend services to Cloud Run, we faced challe
 > Answer:
 
 >*Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.*
+>*Student s253749 focused on GCP. This included creating a Google Cloud Storage bucket, implementing the DVC connection, managing IAM and the service account, and triggering workflows in Google Cloud Build. Also adapted the data.py file so that the .jpg images could be converted to tensors*
+>*We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot and Codex to help write some of our code.*
