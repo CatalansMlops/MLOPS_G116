@@ -1,6 +1,8 @@
 import os
-from unittest.mock import MagicMock, patch, Mock
+from unittest.mock import MagicMock, Mock, patch
+
 import pytest
+
 from mlops_g116 import frontend
 
 # --- Test get_backend_url ---
@@ -10,12 +12,12 @@ def test_get_backend_url_found_in_cloud(mock_client_cls):
     """Test that we find the Cloud Run service URL if it exists."""
     # Setup the mock GCP client
     mock_client = mock_client_cls.return_value
-    
+
     # Create a fake service object
     mock_service = Mock()
     mock_service.name = "projects/dtumlops-484509/locations/europe-west1/services/backend"
     mock_service.uri = "https://my-cloud-run-backend.com"
-    
+
     # Tell list_services to return our fake service
     mock_client.list_services.return_value = [mock_service]
 
@@ -59,7 +61,7 @@ def test_classify_image_success(mock_post):
     mock_post.return_value = mock_response
 
     result = frontend.classify_image(b"fake_image_bytes", "http://backend")
-    
+
     assert result == {"predictions": [{"class": "A", "score": 0.9}]}
     mock_post.assert_called_once()
 
@@ -71,7 +73,7 @@ def test_classify_image_failure(mock_post):
     mock_post.return_value = mock_response
 
     result = frontend.classify_image(b"fake_image_bytes", "http://backend")
-    
+
     assert result is None
 
 
@@ -82,7 +84,7 @@ def test_classify_image_failure(mock_post):
 @patch("mlops_g116.frontend.get_backend_url")
 def test_main_happy_path(mock_get_url, mock_classify, mock_st):
     """Test the full flow: Upload Image -> Classify -> Show Results."""
-    
+
     # 1. Setup Backend URL
     mock_get_url.return_value = "http://backend"
 
@@ -105,7 +107,7 @@ def test_main_happy_path(mock_get_url, mock_classify, mock_st):
     # Assertions: Check if Streamlit functions were called
     mock_st.title.assert_called_once()
     mock_st.image.assert_called_once_with(b"fake_image_data", caption="Uploaded Image")
-    
+
     # Check if we displayed the text result
     # We check if st.write was called with a string containing the prediction
     args, _ = mock_st.write.call_args
@@ -131,10 +133,10 @@ def test_main_no_backend_error(mock_get_url, mock_st):
 def test_main_api_failure(mock_get_url, mock_classify, mock_st):
     """Test flow when backend API fails (returns None)."""
     mock_get_url.return_value = "http://backend"
-    
+
     # Simulate file upload
     mock_st.file_uploader.return_value = Mock()
-    
+
     # Simulate API Failure
     mock_classify.return_value = None
 
