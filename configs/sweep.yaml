@@ -10,13 +10,15 @@ parameters:
   lr:
     values: [0.0001, 0.001, 0.01]
   batch_size:
-    values: [32, 64]
+    values: 32
   epochs:
     value: 10
   model:
-    values: [simple, resnet18, densenet121]
+    values: [simple, resnet18]
   optimizer:
     values: [adam, sgd]
+
+run_cap: 10
 
 # opcional: limita el total de runs si quieres
 # run_cap: 12
