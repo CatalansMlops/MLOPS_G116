@@ -5,7 +5,7 @@ import torch
 from torchvision import transforms
 import typer
 
-IMG_SIZE = 224  # Image size (IMG_SIZE x IMG_SIZE)
+IMG_SIZE = 512  # Image size (IMG_SIZE x IMG_SIZE)
 
 # Transformations
 transform = transforms.Compose([
