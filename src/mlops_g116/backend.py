@@ -9,7 +9,7 @@ from torchvision import transforms
 # Local
 # from src.mlops_g116.model import TumorDetectionModelSimple
 # Docker
-from src.mlops_g116.model import ResNet18
+from mlops_g116.model import ResNet18
 
 # Constants
 MODEL_CHECKPOINT = "models/model.pth"

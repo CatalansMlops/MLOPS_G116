@@ -6,7 +6,7 @@ from PIL import Image
 
 # Adjust this import based on where your backend.py is located relative to tests/
 # If backend.py is in src/mlops_g116/backend.py:
-from src.mlops_g116.backend import app
+from mlops_g116.backend import app
 
 
 def test_read_root():
