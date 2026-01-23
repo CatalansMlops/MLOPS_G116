@@ -31,15 +31,9 @@ jobs:
       with:
         credentials_json: ${{ env.GCP_SERVICE_ACCOUNT_KEY }}
 
-    - uses: iterative/setup-dvc@v1
-
     - name: Confirm GCP secret present
       if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
       run: echo "GCP_SERVICE_ACCOUNT_KEY present, running dvc pull."
-
-    - name: Get data
-      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
-      run: dvc pull
 
     - name: Skip DVC pull (missing secret)
       if: ${{ env.GCP_SERVICE_ACCOUNT_KEY == '' }}
@@ -61,7 +55,17 @@ jobs:
         pip install -r requirements.txt
         pip install -r requirements_dev.txt
         pip install -e .
+        pip install "pathspec>=0.12.1"
+        pip install --upgrade certifi
         pip list
+
+    - name: Fix SSL certs on macOS
+      if: ${{ runner.os == 'macOS' }}
+      run: echo "SSL_CERT_FILE=$(python -c 'import certifi; print(certifi.where())')" >> $GITHUB_ENV
+
+    - name: Get data
+      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
+      run: python -m dvc pull
 
     - name: Test with pytest
       run: |
