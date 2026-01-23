@@ -1,3 +1,5 @@
+"""Training entrypoint using PyTorch Lightning boilerplate."""
+
 import os
 import shutil
 import sys
@@ -61,7 +63,11 @@ def _evaluate_model(model: torch.nn.Module, dataloader: torch.utils.data.DataLoa
 
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
 def train(config: DictConfig) -> None:
-    """Train a LightningModule and save the model artifacts."""
+    """Train a LightningModule and save the model artifacts.
+
+    Args:
+        config: Hydra configuration with hyperparameters and model settings.
+    """
     hparams = config.hyperparameters
     dotenv_available = load_dotenv is not None
     if dotenv_available:
@@ -180,5 +186,10 @@ def train(config: DictConfig) -> None:
         wandb.finish()
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run the Hydra Lightning training entrypoint."""
     train()
+
+
+if __name__ == "__main__":
+    main()

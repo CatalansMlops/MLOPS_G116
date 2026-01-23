@@ -134,7 +134,7 @@ Group 116
 >
 > Answer:
 
-*s254311, s253742, s253749*
+*s254311, s253742, s253749*---
 
 ### Question 3
 > **Did you end up using any open-source frameworks/packages not covered in the course during your project? If so**
@@ -199,7 +199,8 @@ Group 116
 >
 > Answer:
 
---- question 6 fill here ---
+*We used ... for linting and ... for formatting. We also used ... for typing and ... for documentation. These*
+> *concepts are important in larger projects because ... . For example, typing ...*
 
 ## Version control
 
@@ -249,7 +250,7 @@ Group 116
 >
 > Answer:
 
-*We made use of both branches and PRs in our project. In our group, each member had a branch that they worked on in. So in remote we had 4 branches (main and 3 personal ones) and local each one had 2 branches (main+personal). When it was time to upload to git, we added, commited and pushed the personal branch, then switched to main, merged with the personal branch and then pulled from github. That way we could solve the discrepancies locally without messing the code. Finally when everything was up-to-date we pushed the code.*
+*We made use of both branches and pull requests (PRs) in our project. Each group member worked on their own branch. On the remote repository, we had four branches (main and three personal branches), while locally each member had two branches (main and their personal branch). When it was time to upload changes, we added, committed, and pushed the personal branch. After GitHub Actions passed all tests, we opened a pull request to merge the personal branch into main. Once the tests passed again, we authorized the merge and pulled main locally. Pull requests helped improve version control by enforcing code reviews and automated testing before any changes were merged into the main branch. This ensured that new features or fixes were validated, reduced the risk of introducing errors, and maintained a clear and traceable history of changes. This workflow allowed us to resolve issues without affecting the protected main branch.*
 
 
 ### Question 10
@@ -267,8 +268,8 @@ Group 116
 
 > Answer:
 
- *We did make use of DVC in the following way: We created a Cloud Storage (Bucket) where we uploaded the data/raw files. We initialized the dvc in our repo and connected to the bucket, creating a connection between the local and cloud storages in our pipeline.
-In the end it helped us in doing data version control of our data and also enabling quick download of data via dvc pull when cloning the repository (given that the data is not in git)*
+*Yes, we used DVC to manage the data in our project. DVC allowed us to version control large datasets without storing them directly in Git, which would have been inefficient and impractical given the size of the data. By storing the raw dataset in a cloud storage bucket and tracking it through DVC, we were able to maintain a clear and reproducible link between specific versions of the data and the corresponding versions of the code. This improved the reliability and reproducibility of the project, as each experiment or model could be traced back to the exact dataset used. Additionally, DVC enabled efficient collaboration among team members by allowing quick and consistent data synchronization using commands such as -dvc pull-. This ensured that all contributors worked with the same data version, reduced inconsistencies across environments, and simplified the setup process when cloning the repository. Overall, using DVC significantly improved data versioning, reproducibility, and collaboration within the project.*
+
 
 ### Question 11
 
@@ -399,8 +400,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
-> *We used the compute engine to run our Virtual Machines. We used instances with the following hardware: Nvidia T4 GPUs (3 GPUs granted) and we used them to train our models*
-> *using a custom container: ...*
+> *We used Compute Engine, which is the backbone of Google Cloud Platform, to run virtual machines for training our models. Specifically, we used e2-medium instances with 2 virtual CPUs and 4 GB of memory, running on x86‑64 architecture.We started these virtual machines using a custom container that included all the dependencies and code necessary for our project. This setup allowed us to have a reproducible environment for training, ensuring that all team members could run the same workloads consistently. Compute Engine gave us the flexibility to choose the VM type and resources based on our project requirements and to scale the environment as needed.*
 
 ### Question 19
 
@@ -409,7 +409,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 19 fill here ---
+![Bucket](figures/bucket_screenshot.png)
 
 ### Question 20
 
@@ -418,7 +418,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 20 fill here ---
+![Artifact](figures/artifact_screenshot.png)
 
 ### Question 21
 
@@ -427,7 +427,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 21 fill here ---
+![Cloud Build](figures/build_screenshot.png)
 
 ### Question 22
 
@@ -442,7 +442,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
-*We managed to train our model in the cloud using the Vertex AI. We did this by creating an actionable trigger (.ymal) that trained the models. The reason we choose the Vertex AI was because it was more simple and it was quicker*
+*We managed to train our model in the cloud using Vertex AI. To do this, we created an actionable trigger (vertex_ai_train.yaml) that could be executed manually from Google Cloud Build. Once the container was pushed to the Artifact Registry, we started training our model. We chose Vertex AI over using a Compute Engine because Vertex AI provides a higher-level, managed environment specifically designed for machine learning workflows. It simplifies tasks such as resource provisioning, scaling, experiment tracking and monitoring. Unlike Compute Engine, where we would have had to manually configure virtual machines, install dependencies, and manage GPU resources, Vertex AI allowed us to train models quickly and reliably with minimal setup. This made the training process faster, less error-prone, and easier to reproduce, which was particularly beneficial for our team workflow.*
 
 ## Deployment
 
@@ -476,7 +476,7 @@ We developed an API for our model using FastAPI. The API consists of a root endp
 >
 > Answer:
 
-We successfully deployed our API both locally (running it via the command line and containerized with docker run) and in the cloud using Google Cloud Run. To deploy to the cloud, we created a Dockerfile (backend.dockerfile) that sets up the necessary environment and dependencies. After building the Docker image, we tagged and pushed it to Google Cloud Artifact Registry. Then, we deployed the image to Cloud Run, configuring the service with unauthenticated access and assigning it sufficient memory resources (2GB). Cloud Run automatically provided a public URL for our API. To invoke the deployed API, you can run the following command: `curl -X POST "https://backend-277552599633.europe-west1.run.app/classify/"   -H "accept: application/json"   -F "file=@path_to_image.jpg;type=image/jpeg"`. Additonally, we set up continuous deployment using Google Cloud Build with the `cloudbuild.yaml`, which automatically builds and deploys the Docker image whenever changes are pushed to the main branch of our GitHub repository.
+*We successfully deployed our API both locally (running it via the command line and containerized with docker run) and in the cloud using Google Cloud Run. To deploy to the cloud, we created a Dockerfile (backend.dockerfile) that sets up the necessary environment and dependencies. After building the Docker image, we tagged and pushed it to Google Cloud Artifact Registry. Then, we deployed the image to Cloud Run, configuring the service with unauthenticated access and assigning it sufficient memory resources (2GB). Cloud Run automatically provided a public URL for our API. To invoke the deployed API, you can run the following command: `curl -X POST "https://backend-277552599633.europe-west1.run.app/classify/"   -H "accept: application/json"   -F "file=@path_to_image.jpg;type=image/jpeg"`. Additonally, we set up continuous deployment using Google Cloud Build with the `cloudbuild.yaml`, which automatically builds and deploys the Docker image whenever changes are pushed to the main branch of our GitHub repository.*
 
 ### Question 25
 
@@ -491,8 +491,7 @@ We successfully deployed our API both locally (running it via the command line a
 >
 > Answer:
 
-We implemented integration tests with Pytest that test how different components (FastAPI, PyTorch model, file handling) work together in the API. The tests verify the API is alive and reachable and validate the full machine learning inference pipeline: they confirm the loading of the PyTorch model, weights, and transforms into memory without crashing, test if the API accepts standard file uploads, verify that the model actually runs on the input and produces an output, and check that the output JSON contains the correct keys and returns exactly 4 classes.
-For load testing, we created a locustfile that simulates sending POST requests with image files to the /classify endpoint. We tested three scenarios: 1, 5, and 20 concurrent users. While performance remained stable at 1 and 5 users with no latency degradation, at 20 users, the system reached 7.0 RPS and began failing (significantly increased latency). In conclusion, our current Cloud Run deployment (1 CPU, 2GB RAM) supports relatively low traffic volumes. To increase capacity, we could increase the number of CPUs assigned to the service and, consequently, the number of workers running the API to utilize those CPUs.
+*We implemented integration tests with Pytest that test how different components (FastAPI, PyTorch model, file handling) work together in the API. The tests verify the API is alive and reachable and validate the full machine learning inference pipeline: they confirm the loading of the PyTorch model, weights, and transforms into memory without crashing, test if the API accepts standard file uploads, verify that the model actually runs on the input and produces an output, and check that the output JSON contains the correct keys and returns exactly 4 classes. For load testing, we created a locustfile that simulates sending POST requests with image files to the /classify endpoint. We tested three scenarios: 1, 5, and 20 concurrent users. While performance remained stable at 1 and 5 users with no latency degradation, at 20 users, the system reached 7.0 RPS and began failing (significantly increased latency). In conclusion, our current Cloud Run deployment (1 CPU, 2GB RAM) supports relatively low traffic volumes. To increase capacity, we could increase the number of CPUs assigned to the service and, consequently, the number of workers running the API to utilize those CPUs.*
 
 
 ### Question 26
@@ -528,10 +527,7 @@ Regarding the detection of distribution shifts, target drift is a more practical
 >
 > Answer:
 
-In total, we utilized approximately 129.53 DKK in credits. The most expensive service was Container Registry Vulnerability Scanning (103.79 DKK), which accounted for the vast majority of our spending, likely due to automatic scanning of every container image pushed. Vertex AI was the second highest expense at 8.33 DKK, reflecting the computational resources used for our actual machine learning trainings.
-
-Overall, working in the cloud was challenging, particularly regarding authentications and permissions. We encountered frequent issues ensuring services had the correct permissions to communicate. Debugging these authentication errors was time consuming, but it provided essential knowledge of how secure cloud infrastructure is managed.
-`![imageq27](figures/billing.png)`
+*In total, we used kr130 out of kr8,237 available for our project. The most expensive service was Container Registry Vulnerability Scanning, which cost kr104, followed by Vertex AI and Cloud Run, each costing kr6, and Compute Engine and Artifact Registry, each costing kr4. Overall, working in the cloud was a very positive experience. It provided scalability, flexibility, and easy access to powerful computing resources without the need to maintain physical hardware. Services like Vertex AI and Cloud Run simplified deployment, automated resource management and allowed us to focus on developing and testing our model rather than managing infrastructure. However, there are some drawbacks. Cloud costs can increase quickly if resources are not managed carefully and understanding all the services and their configurations can be overwhelming at first. Despite these challenges, the advantages of speed, reproducibility, collaboration and low maintenance made cloud computing an excellent choice for our project.*
 
 ### Question 28
 
@@ -547,7 +543,7 @@ Overall, working in the cloud was challenging, particularly regarding authentica
 >
 > Answer:
 
-We implemented a frontend for our API using Streamlit. The frontend allows users to easily upload images and view the model's predictions in a user-friendly interface.  Users can upload an image, and upon submission, the frontend sends the image to the backend API (classify endpoint) for classification. The predictions are then displayed on the same page, providing immediate feedback to the user. The frontend is also containerized and deployed in Google Cloud Run and is publicly accessible in https://frontend-277552599633.europe-west1.run.app.
+*We implemented a frontend for our API using Streamlit. The frontend allows users to easily upload images and view the model's predictions in a user-friendly interface.  Users can upload an image, and upon submission, the frontend sends the image to the backend API (classify endpoint) for classification. The predictions are then displayed on the same page, providing immediate feedback to the user. The frontend is also containerized and deployed in Google Cloud Run and is publicly accessible in https://frontend-277552599633.europe-west1.run.app.*
 
 ### Question 29
 
@@ -564,8 +560,9 @@ We implemented a frontend for our API using Streamlit. The frontend allows users
 >
 > Answer:
 
-TO DO: falta afegir diagrama i comentar la resta (feel free de borrar el que vulgueu)
-We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatically triggers builds and deployments whenever we do a push in the main branch of the GitHub repository. The Cloud Build service builds and pushes the Docker images to Google Cloud Artifact Registry and then it deploys the backend and frontend images to Google Cloud Run, making them publicly accessible.
+![Pipeline](figures/pipeline.png)
+
+*We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatically triggers builds and deployments whenever we do a push in the main branch of the GitHub repository. The Cloud Build service builds and pushes the Docker images to Google Cloud Artifact Registry and then it deploys the backend and frontend images to Google Cloud Run, making them publicly accessible.*
 
 ### Question 30
 
@@ -580,8 +577,8 @@ We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatical
 > Answer:
 
 TO DO: completaaar(feel free de borrar el que vulgueu)
-One of the main problems was setting up the CI/CD pipeline. We encountered several issues with permissions, authentication and configurations in Google Cloud Build and Cloud Run. 
-During deployment of frontend and backend services to Cloud Run, we faced challenges related to memory allocation and service accessibility. Initially, the backend service was allocated only 512MB of memory, which proved insufficient for loading the machine learning model, leading to crashes. We resolved this by increasing the memory allocation to 2GB, ensuring stable operation.
+*One of the main problems was setting up the CI/CD pipeline. We encountered several issues with permissions, authentication and configurations in Google Cloud Build and Cloud Run.
+During deployment of frontend and backend services to Cloud Run, we faced challenges related to memory allocation and service accessibility. Initially, the backend service was allocated only 512MB of memory, which proved insufficient for loading the machine learning model, leading to crashes. We resolved this by increasing the memory allocation to 2GB, ensuring stable operation.*
 
 ### Question 31
 
@@ -599,4 +596,4 @@ During deployment of frontend and backend services to Cloud Run, we faced challe
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
-Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.
+*Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.*

@@ -1,3 +1,5 @@
+"""Download model artifacts from the W&B registry."""
+
 import os
 import shutil
 from pathlib import Path
@@ -19,7 +21,18 @@ def download_and_load(
     alias: str,
     artifact_dir: Path,
 ) -> Path:
-    """Download a registry artifact, validate it, and save the checkpoint locally."""
+    """Download a registry artifact and save the checkpoint locally.
+
+    Args:
+        entity: W&B entity name.
+        registry: W&B registry name.
+        collection: W&B collection name within the registry.
+        alias: Artifact alias to resolve.
+        artifact_dir: Directory to store the downloaded artifact.
+
+    Returns:
+        Path to the saved model checkpoint in the local models directory.
+    """
     api = wandb.Api()
     artifact_name = f"{entity}/{registry}/{collection}:{alias}"
     artifact = api.artifact(artifact_name)

@@ -1,3 +1,5 @@
+"""PyTorch model definitions for brain tumor classification."""
+
 import torch
 import torchvision.models as models
 from torch import nn
@@ -7,18 +9,25 @@ class ResNet18(nn.Module):
     """ResNet18 classifier adapted for grayscale MRI images."""
 
     def __init__(self, num_classes: int = 4) -> None:
+        """Initialize the ResNet18 backbone.
+
+        Args:
+            num_classes: Number of output classes.
+        """
         super().__init__()
-
-        # Load backbone with pre-trained ImageNet weights
         self.backbone = models.resnet18(weights="DEFAULT")
-
-        # Modify input layer to accept 1-channel grayscale images
         self.backbone.conv1 = nn.Conv2d(in_channels=1, out_channels=64, kernel_size=7, stride=2, padding=3, bias=False)
-
-        # Replace classification head
         self.backbone.fc = nn.Linear(self.backbone.fc.in_features, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Run a forward pass.
+
+        Args:
+            x: Input batch tensor of shape [N, 1, H, W].
+
+        Returns:
+            Logits tensor of shape [N, num_classes].
+        """
         return self.backbone(x)
 
 
@@ -26,6 +35,11 @@ class DenseNet121(nn.Module):
     """DenseNet121 classifier adapted for grayscale MRI images."""
 
     def __init__(self, num_classes: int = 4) -> None:
+        """Initialize the DenseNet121 backbone.
+
+        Args:
+            num_classes: Number of output classes.
+        """
         super().__init__()
         self.backbone = models.densenet121(weights="DEFAULT")
         self.backbone.features.conv0 = nn.Conv2d(
@@ -39,6 +53,14 @@ class DenseNet121(nn.Module):
         self.backbone.classifier = nn.Linear(self.backbone.classifier.in_features, num_classes)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Run a forward pass.
+
+        Args:
+            x: Input batch tensor of shape [N, 1, H, W].
+
+        Returns:
+            Logits tensor of shape [N, num_classes].
+        """
         return self.backbone(x)
 
 
@@ -46,6 +68,7 @@ class TumorDetectionModelSimple(nn.Module):
     """Basic tumor detection model."""
 
     def __init__(self) -> None:
+        """Initialize the lightweight convolutional classifier."""
         super().__init__()
         self.conv1 = nn.Conv2d(1, 32, 3, 1)
         self.conv2 = nn.Conv2d(32, 64, 3, 1)
@@ -55,7 +78,14 @@ class TumorDetectionModelSimple(nn.Module):
         self.fc1 = nn.Linear(128, 4)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass."""
+        """Run a forward pass.
+
+        Args:
+            x: Input batch tensor of shape [N, 1, H, W].
+
+        Returns:
+            Logits tensor of shape [N, 4].
+        """
         if x.dim() != 4:
             raise ValueError("Expected input to be a 4D tensor [N, C, H, W].")
         if x.shape[1] != 1:
@@ -72,13 +102,17 @@ class TumorDetectionModelSimple(nn.Module):
         return self.fc1(x)
 
 
-if __name__ == "__main__":
+def main() -> None:
+    """Run a quick shape check for the model definitions."""
     model = ResNet18(num_classes=4)
     print(f"Model: ResNet18 | Parameters: {sum(p.numel() for p in model.parameters()):,}")
 
-    # Generate dummy input (Batch, Channel, Height, Width)
     dummy_input = torch.randn(1, 1, 224, 224)
 
     output = model(dummy_input)
     print(f"Input shape: {dummy_input.shape}")
     print(f"Output shape: {output.shape}")
+
+
+if __name__ == "__main__":
+    main()

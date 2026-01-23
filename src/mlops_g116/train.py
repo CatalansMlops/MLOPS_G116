@@ -1,3 +1,5 @@
+"""Training entrypoint for the brain tumor classifier."""
+
 import cProfile
 import os
 import shutil
@@ -26,10 +28,6 @@ from hydra.utils import instantiate
 
 from mlops_g116.data import load_data
 
-# Select the best available device:
-# - CUDA if an NVIDIA GPU is available
-# - MPS for Apple Silicon
-# - CPU otherwise
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -37,7 +35,15 @@ CONFIG_DIR = REPO_ROOT / "configs"
 
 
 def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
-    """Return an available port, preferring the requested one."""
+    """Return an available local TCP port.
+
+    Args:
+        preferred_port: The first port to try.
+        max_tries: Number of consecutive ports to probe.
+
+    Returns:
+        A port that is available for binding.
+    """
     for port in range(preferred_port, preferred_port + max_tries):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             if sock.connect_ex(("127.0.0.1", port)) != 0:
@@ -93,7 +99,12 @@ def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: boo
 
 
 def _launch_snakeviz(profile_path: Path, preferred_port: int) -> None:
-    """Start Snakeviz for the run profile if available."""
+    """Start Snakeviz for the run profile if available.
+
+    Args:
+        profile_path: Path to the cProfile output file.
+        preferred_port: Preferred port to bind for the Snakeviz server.
+    """
     try:
         import snakeviz  # noqa: F401
     except ModuleNotFoundError:
@@ -106,19 +117,11 @@ def _launch_snakeviz(profile_path: Path, preferred_port: int) -> None:
 
 
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
-def train(config) -> None:
-    """
-    Train a neural network on the MNIST dataset and save the trained model
-    together with training statistics.
+def train(config: DictConfig) -> None:
+    """Train a tumor classification model and persist artifacts.
 
-            Parameters:
-                    lr (float): Learning rate used by the optimizer.
-                    batch_size (int): Number of samples per training batch.
-                    epochs (int): Number of full passes over the training dataset.
-
-            Returns:
-                    None: The function saves the trained model weights to disk
-                          and stores training loss and accuracy plots.
+    Args:
+        config: Hydra configuration with hyperparameters, model, and optimizer settings.
     """
     hparams = config.hyperparameters
     dotenv_available = load_dotenv is not None
@@ -175,10 +178,8 @@ def train(config) -> None:
     profiler.enable()
     logger.info(f"Run outputs saved under: {output_dir}")
 
-    # Initialize model and move it to the selected device (GPU/CPU)
     model = instantiate(config.model).to(DEVICE)
 
-    # train_set is used for training, test_set is ignored here
     train_set, _ = load_data()
     train_labels = train_set.tensors[1]
     unique_labels, label_counts = torch.unique(train_labels, return_counts=True)
@@ -186,16 +187,12 @@ def train(config) -> None:
     logger.info(f"Train labels: {label_summary}")
     if hasattr(model, "fc1"):
         logger.info(f"Model output classes: {model.fc1.out_features}")
-    # Wrap dataset into a DataLoader to iterate in mini-batches
     train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=hparams.batch_size)
 
-    # Standard loss function for multi-class classification
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    # Adam optimizer updates model parameters using gradients
     optimizer = instantiate(config.optimizer, params=model.parameters())
 
-    # Store statistics for visualization later
     statistics = {"train_loss": [], "train_accuracy": []}
 
     final_preds = None
@@ -295,7 +292,6 @@ def train(config) -> None:
 
     logger.info("Training complete")
 
-    # Save trained model parameters to disk
     model_path = model_dir / "model.pth"
     torch.save(model.state_dict(), model_path)
     local_model_dir = REPO_ROOT / "models"
@@ -344,14 +340,12 @@ def train(config) -> None:
             else:
                 target_path = f"{registry_name}/{collection_name}"
             wandb_run.link_artifact(artifact, target_path=target_path, aliases=["latest"])
-    # Plot training loss and accuracy
     fig, axs = plt.subplots(1, 2, figsize=(15, 5))
     axs[0].plot(statistics["train_loss"])
     axs[0].set_title("Train loss")
     axs[1].plot(statistics["train_accuracy"])
     axs[1].set_title("Train accuracy")
 
-    # Save figure in reports folder
     training_figure_path = figure_dir / "training_statistics.png"
     fig.savefig(training_figure_path)
     local_figures_dir = REPO_ROOT / "reports" / "figures"

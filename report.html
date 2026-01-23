@@ -1,0 +1,76 @@
+<p>Ops Pipeline for Brain Tumor Detection</p>
+<h2>1. Dataset Selection</h2>
+<p><strong>Dataset:</strong> <a href="https://www.kaggle.com/datasets/masoudnickparvar/brain-tumor-mri-dataset/data">Brain Tumor MRI Dataset</a>
+* <strong>Source:</strong> Kaggle (Masoud Nickparvar)
+* <strong>Type:</strong> Medical Imaging (2D MRI Slices)</p>
+<h2>2. Model Selection</h2>
+<p><strong>Model:</strong> ResNet-18
+* <strong>Architecture:</strong> Convolutional Neural Network (CNN) with residual connections.
+* <strong>Rationale:</strong> We selected ResNet-18 because it provides a strong baseline for medical image classification while being computationally efficient. This allows for faster iteration cycles in our MLOps pipeline (training, testing, deployment) without requiring massive GPU resources.</p>
+<h2>3. Project Description</h2>
+<h3>a. Overall Goal of the Project</h3>
+<p>The goal is to engineer a robust, end-to-end MLOps pipeline that automates the classification of brain MRI scans into four diagnostic categories. The project focuses on the <em>operational</em> aspects of machine learning—such as automated data validation, model versioning, continuous integration/training (CI/CD), and model monitoring—rather than just achieving the highest possible accuracy.</p>
+<h3>b. Data Description</h3>
+<p>We will be using the <strong>Brain Tumor MRI Dataset</strong> aggregated from multiple open-source medical repositories.
+* <strong>Total Samples:</strong> Approximately <strong>7,023 images</strong>.
+* <strong>Modality:</strong> 2D MRI scans (JPG format).
+* <strong>Classes:</strong> 4 categories (Glioma, Meningioma, Pituitary, No Tumor).
+* <strong>Size:</strong> ~150 MB.
+* <strong>Structure:</strong> The data is organized into train/test folders by class label, simplifying the initial data loading pipeline.</p>
+<h3>c. Expected Models</h3>
+<ul>
+<li><strong>Baseline:</strong> We will start with a <strong>ResNet-18</strong> backbone pre-trained on ImageNet, modifying the final fully connected layer to output 4 classes.</li>
+<li><strong>Future/Experimental:</strong> If the MLOps pipeline is stable, we may experiment with <strong>EfficientNet-B0</strong> for better parameter efficiency or explore <strong>MONAI</strong>-specific implementations (e.g., DenseNet121) tailored for healthcare imaging.</li>
+</ul>
+<h2>Project structure</h2>
+<p>The directory structure of the project looks like this:
+<code>txt
+├── .github/                  # Github actions and dependabot
+│   ├── dependabot.yaml
+│   └── workflows/
+│       └── tests.yaml
+├── configs/                  # Configuration files
+├── data/                     # Data directory
+│   ├── processed
+│   └── raw
+|       └── brain_dataset     # Brain Tumor MRI Dataset
+|           └── Training
+|           └── Testing
+├── dockerfiles/              # Dockerfiles
+│   ├── api.Dockerfile
+│   └── main.Dockerfile
+|   └── frontend.Dockerfile
+|   └── backend.Dockerfile
+├── docs/                     # Documentation
+│   ├── mkdocs.yml
+│   └── source/
+│       └── index.md
+├── models/                   # Trained models
+├── notebooks/                # Jupyter notebooks
+├── reports/                  # Reports
+│   └── figures/
+├── src/                      # Source code
+│   ├── project_name/
+│   │   ├── __init__.py
+│   │   ├── api.py
+│   │   ├── data.py
+│   │   ├── evaluate.py
+│   │   ├── models.py
+│   │   ├── train.py
+│   │   └── visualize.py
+└── tests/                    # Tests
+│   ├── __init__.py
+│   ├── test_api.py
+│   ├── test_data.py
+│   └── test_model.py
+├── .gitignore
+├── .pre-commit-config.yaml
+├── LICENSE
+├── pyproject.toml            # Python project file
+├── README.md                 # Project README
+├── requirements.txt          # Project requirements
+├── requirements_dev.txt      # Development requirements
+└── tasks.py                  # Project tasks</code></p>
+<p>Created using <a href="https://github.com/SkafteNicki/mlops_template">mlops_template</a>,
+a <a href="https://github.com/cookiecutter/cookiecutter">cookiecutter template</a> for getting
+started with Machine Learning Operations (MLOps).</p>

@@ -1,3 +1,5 @@
+"""Evaluate trained checkpoints and persist metrics and figures."""
+
 import cProfile
 import json
 import os
@@ -32,7 +34,15 @@ CONFIG_DIR = REPO_ROOT / "configs"
 
 
 def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
-    """Return an available port, preferring the requested one."""
+    """Return an available local TCP port.
+
+    Args:
+        preferred_port: The first port to try.
+        max_tries: Number of consecutive ports to probe.
+
+    Returns:
+        A port that is available for binding.
+    """
     for port in range(preferred_port, preferred_port + max_tries):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             if sock.connect_ex(("127.0.0.1", port)) != 0:
@@ -41,13 +51,26 @@ def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
 
 
 def _is_port_open(port: int) -> bool:
-    """Check whether a local TCP port is accepting connections."""
+    """Check whether a local TCP port is accepting connections.
+
+    Args:
+        port: TCP port number to probe.
+
+    Returns:
+        True if the port accepts connections, otherwise False.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         return sock.connect_ex(("127.0.0.1", port)) == 0
 
 
 def _launch_tensorboard(trace_dir: Path, preferred_port: int, open_browser: bool) -> None:
-    """Start TensorBoard for the profiler traces if available."""
+    """Start TensorBoard for the profiler traces if available.
+
+    Args:
+        trace_dir: Directory containing profiler trace files.
+        preferred_port: Preferred port to bind for TensorBoard.
+        open_browser: Whether to open the TensorBoard URL in a browser tab.
+    """
     tensorboard_cmd = shutil.which("tensorboard")
     if tensorboard_cmd is None:
         logger.warning("tensorboard is not installed; skipping automatic launch.")
@@ -75,7 +98,12 @@ def _launch_tensorboard(trace_dir: Path, preferred_port: int, open_browser: bool
 
 
 def _launch_snakeviz(profile_path: Path, preferred_port: int) -> None:
-    """Start Snakeviz for the run profile if available."""
+    """Start Snakeviz for the run profile if available.
+
+    Args:
+        profile_path: Path to the cProfile output file.
+        preferred_port: Preferred port to bind for the Snakeviz server.
+    """
     try:
         import snakeviz  # noqa: F401
     except ModuleNotFoundError:
@@ -264,4 +292,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    evaluate()
+    main()

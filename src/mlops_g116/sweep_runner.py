@@ -1,3 +1,5 @@
+"""Launch sweep-configured training runs via Hydra overrides."""
+
 import subprocess
 import sys
 
@@ -5,7 +7,11 @@ import wandb
 
 
 def main() -> None:
-    """Run a sweep-configured training job via Hydra overrides."""
+    """Run a sweep-configured training job via Hydra overrides.
+
+    The W&B sweep config should define lr, batch_size, epochs, model, and
+    optimizer entries in the sweep parameters.
+    """
     run = wandb.init()
     cfg = run.config
     args = [
