@@ -459,7 +459,8 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 23 fill here ---
+We developed an API for our model using FastAPI. The API consists of a root endpoint to test if the service is running and a /classify endpoint that takes in an image and returns the predictions of the best-performing trained model saved in models/model.pth. We implemented an async lifespan for the API (using app = FastAPI(lifespan=lifespan)) to separate initialization from inference. This ensures that the model is loaded only once when the application starts, improving performance for subsequent requests.
+
 
 ### Question 24
 
@@ -475,7 +476,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 24 fill here ---
+We successfully deployed our API both locally (running it via the command line and containerized with docker run) and in the cloud using Google Cloud Run. To deploy to the cloud, we created a Dockerfile (backend.dockerfile) that sets up the necessary environment and dependencies. After building the Docker image, we tagged and pushed it to Google Cloud Artifact Registry. Then, we deployed the image to Cloud Run, configuring the service with unauthenticated access and assigning it sufficient memory resources (2GB). Cloud Run automatically provided a public URL for our API. To invoke the deployed API, you can run the following command: `curl -X POST "https://backend-277552599633.europe-west1.run.app/classify/"   -H "accept: application/json"   -F "file=@path_to_image.jpg;type=image/jpeg"`. Additonally, we set up continuous deployment using Google Cloud Build with the `cloudbuild.yaml`, which automatically builds and deploys the Docker image whenever changes are pushed to the main branch of our GitHub repository.
 
 ### Question 25
 
@@ -490,7 +491,9 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 25 fill here ---
+We implemented integration tests with Pytest that test how different components (FastAPI, PyTorch model, file handling) work together in the API. The tests verify the API is alive and reachable and validate the full machine learning inference pipeline: they confirm the loading of the PyTorch model, weights, and transforms into memory without crashing, test if the API accepts standard file uploads, verify that the model actually runs on the input and produces an output, and check that the output JSON contains the correct keys and returns exactly 4 classes.
+For load testing, we created a locustfile that simulates sending POST requests with image files to the /classify endpoint. We tested three scenarios: 1, 5, and 20 concurrent users. While performance remained stable at 1 and 5 users with no latency degradation, at 20 users, the system reached 7.0 RPS and began failing (resulting in 3 dropped requests and significantly increased latency). In conclusion, our current Cloud Run deployment (1 CPU, 2GB RAM) supports relatively low traffic volumes. To increase capacity, we could increase the number of CPUs assigned to the service and, consequently, the number of workers running the API to utilize those CPUs.
+
 
 ### Question 26
 
@@ -505,7 +508,8 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 26 fill here ---
+We did not manage to implement monitoring for our deployed model. However, implementing monitoring would be important for ensuring the reliability of our application. Monitoring would allow us to track key performance metrics such as response times, error rates, and system resource usage (CPU, memory). These metrics would help us identify potential bottlenecks or failures in the system.
+For our project, target drift is a more practical strategy than data drift. While detecting drift in images requires complex, resource-heavy feature extraction, target drift simply analyzes the model's outputs. Any significant shift in the distribution of predicted classes could serve as an indicator of potential model failure.
 
 ## Overall discussion of project
 
@@ -540,7 +544,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 28 fill here ---
+We implemented a frontend for our API using Streamlit. The frontend allows users to easily upload images and view the model's predictions in a user-friendly interface.  Users can upload an image, and upon submission, the frontend sends the image to the backend API (classify endpoint) for classification. The predictions are then displayed on the same page, providing immediate feedback to the user. The frontend is also containerized and deployed in Google Cloud Run and is publicly accessible in https://frontend-277552599633.europe-west1.run.app.
 
 ### Question 29
 
@@ -557,7 +561,7 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 29 fill here ---
+We implemented a CI/CD pipeline with the `cloudbuild.yaml` file that automatically triggers builds and deployments whenever we do a push in the main branch of the GitHub repository. The Cloud Build service builds and pushes the Docker images to Google Cloud Artifact Registry and then it deploys the backend and frontend images to Google Cloud Run, making them publicly accessible.
 
 ### Question 30
 
@@ -571,7 +575,9 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 >
 > Answer:
 
---- question 30 fill here ---
+TO DO: completaaar(feel free de borrar el que vulgueu)
+One of the main problems was setting up the CI/CD pipeline. We encountered several issues with permissions, authentication and configurations in Google Cloud Build and Cloud Run. 
+During deployment of frontend and backend services to Cloud Run, we faced challenges related to memory allocation and service accessibility. Initially, the backend service was allocated only 512MB of memory, which proved insufficient for loading the machine learning model, leading to crashes. We resolved this by increasing the memory allocation to 2GB, ensuring stable operation.
 
 ### Question 31
 
@@ -589,4 +595,4 @@ Cloud Build is for building the images (via trigger) and pushing them to the Art
 > *We have used ChatGPT to help debug our code. Additionally, we used GitHub Copilot to help write some of our code.*
 > Answer:
 
---- question 31 fill here ---
+Student s253742 focused on the deployment aspect of the project. This included writing the FastAPI backend application and the Streamlit frontend, containerizing them with Docker, and deploying them to Google Cloud Run. He also set up the CI/CD pipeline using Google Cloud Build to automate the build and deployment processes of them. Additionally, he contributed to writing integration and load tests for the API.
