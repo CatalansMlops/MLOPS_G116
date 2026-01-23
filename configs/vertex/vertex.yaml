@@ -1,6 +1,6 @@
 workerPoolSpecs:
 - machineSpec:
-    machineType: n1-highmem-8
+    machineType: n1-highmem-16
     acceleratorType: NVIDIA_TESLA_T4
     acceleratorCount: 1
   replicaCount: 1
@@ -15,6 +15,6 @@ workerPoolSpecs:
     - training=exp1
     - model=resnet18
     - optimizer=adam
-    - hyperparameters.lr=0.0001
-    - hyperparameters.batch_size=64
-    - hyperparameters.epochs=10
+    - hyperparameters.lr=0.0003
+    - hyperparameters.batch_size=32
+    - hyperparameters.epochs=50
