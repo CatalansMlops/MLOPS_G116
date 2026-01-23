@@ -1,3 +1,5 @@
+"""Dataset preprocessing utilities for local image folders."""
+
 import os
 from pathlib import Path
 
@@ -6,28 +8,41 @@ import typer
 from PIL import Image
 from torchvision import transforms
 
-IMG_SIZE = 224  # Image size (IMG_SIZE x IMG_SIZE)
+IMG_SIZE = 224
 
-# Transformations
 transform = transforms.Compose(
     [
         transforms.Resize((IMG_SIZE, IMG_SIZE)),
-        transforms.ToTensor(),  # Converts [C,H,W] and scales to [0,1]
+        transforms.ToTensor(),
     ]
 )
 
 
 def normalize(images: torch.Tensor) -> torch.Tensor:
-    """Normalizes images: mean 0, std 1"""
+    """Normalize image tensors to zero mean and unit variance.
+
+    Args:
+        images: Image batch tensor.
+
+    Returns:
+        Normalized image tensor.
+    """
     return (images - images.mean()) / images.std()
 
 
-def process_folder(folder_path: str):
-    """Load all images in a folder (with subfolders for classes)"""
+def process_folder(folder_path: str) -> tuple[torch.Tensor, torch.Tensor]:
+    """Load images from a folder with class subfolders.
+
+    Args:
+        folder_path: Root directory that contains class subfolders.
+
+    Returns:
+        Tuple with stacked image tensors and integer labels.
+    """
     images = []
     labels = []
 
-    class_folders = sorted(os.listdir(folder_path))  # tumor_type_1, tumor_type_2, etc.
+    class_folders = sorted(os.listdir(folder_path))
 
     for label, class_folder in enumerate(class_folders):
         class_path = os.path.join(folder_path, class_folder)
@@ -47,9 +62,14 @@ def process_folder(folder_path: str):
 
 
 def preprocess(raw_dir: str = "data/raw/brain_dataset", processed_dir: str = "data/processed") -> None:
+    """Preprocess local raw images and save tensors to disk.
+
+    Args:
+        raw_dir: Directory with raw data organized by Training/Testing subfolders.
+        processed_dir: Output directory for serialized tensors.
+    """
     os.makedirs(processed_dir, exist_ok=True)
 
-    # Paths
     train_dir = os.path.join(raw_dir, "Training")
     test_dir = os.path.join(raw_dir, "Testing")
 
@@ -67,7 +87,7 @@ def preprocess(raw_dir: str = "data/raw/brain_dataset", processed_dir: str = "da
     torch.save(x_test, os.path.join(processed_dir, "test_images.pt"))
     torch.save(y_test, os.path.join(processed_dir, "test_target.pt"))
 
-    print("Data processed and saved in", processed_dir)
+    print(f"Data processed and saved in {processed_dir}")
 
 
 def _resolve_processed_dir(processed_dir: str | Path | None = None) -> Path:
@@ -84,7 +104,9 @@ def _resolve_processed_dir(processed_dir: str | Path | None = None) -> Path:
     return Path(os.getenv("DATA_ROOT", "data/processed"))
 
 
-def load_data(processed_dir: str | Path | None = None):
+def load_data(
+    processed_dir: str | Path | None = None,
+) -> tuple[torch.utils.data.TensorDataset, torch.utils.data.TensorDataset]:
     """Load processed dataset and return PyTorch TensorDataset.
 
     Args:
@@ -106,7 +128,7 @@ def load_data(processed_dir: str | Path | None = None):
 
 
 def main() -> None:
-    # Expose the preprocess function as a CLI using Typer
+    """Run preprocessing from the command line."""
     typer.run(preprocess)
 
 

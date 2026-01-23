@@ -1,15 +1,17 @@
+"""Dataset preprocessing utilities for Google Cloud Storage buckets."""
+
 import os
 from io import BytesIO
 
 import torch
 import typer
 from google.cloud import storage
+from google.cloud.storage.bucket import Bucket
 from PIL import Image
 from torchvision import transforms
 
-IMG_SIZE = 224  # Image size (IMG_SIZE x IMG_SIZE)
+IMG_SIZE = 224
 
-# Transformations
 transform = transforms.Compose(
     [
         transforms.Resize((IMG_SIZE, IMG_SIZE)),
@@ -19,18 +21,32 @@ transform = transforms.Compose(
 
 
 def normalize(images: torch.Tensor) -> torch.Tensor:
-    """Normalizes images: mean 0, std 1"""
+    """Normalize image tensors to zero mean and unit variance.
+
+    Args:
+        images: Image batch tensor.
+
+    Returns:
+        Normalized image tensor.
+    """
     return (images - images.mean()) / images.std()
 
 
-def process_folder_from_bucket(bucket, prefix: str):
-    """Load all images from a GCS folder (with subfolders for classes)"""
+def process_folder_from_bucket(bucket: Bucket, prefix: str) -> tuple[torch.Tensor, torch.Tensor]:
+    """Load images from a GCS prefix with class subfolders.
+
+    Args:
+        bucket: GCS bucket containing the dataset.
+        prefix: Prefix that points to the dataset split, such as Training/Testing.
+
+    Returns:
+        Tuple with stacked image tensors and integer labels.
+    """
     images = []
     labels = []
 
     blobs = list(bucket.list_blobs(prefix=prefix))
 
-    # Extract class folder names
     class_names = sorted(
         {blob.name.split("/")[3] for blob in blobs if blob.name.lower().endswith(("jpg", "jpeg", "png"))}
     )
@@ -61,7 +77,18 @@ def preprocess(
     raw_prefix: str = "data/raw/brain_dataset",
     processed_dir: str = "data/processed",
 ) -> None:
-    """Preprocess data from GCS bucket and save tensors locally"""
+    """Preprocess data from a GCS bucket and save tensors locally.
+
+    This workflow expects Google Cloud credentials (for example via the
+    GOOGLE_APPLICATION_CREDENTIALS environment variable). If you prefer a
+    local workflow, download the dataset with tools like gsutil or DVC and
+    use the local preprocessing pipeline instead.
+
+    Args:
+        bucket_name: GCS bucket name containing the dataset.
+        raw_prefix: Prefix inside the bucket with Training/Testing subfolders.
+        processed_dir: Local directory to store processed tensors.
+    """
 
     os.makedirs(processed_dir, exist_ok=True)
 
@@ -84,11 +111,15 @@ def preprocess(
     torch.save(x_test, os.path.join(processed_dir, "test_images.pt"))
     torch.save(y_test, os.path.join(processed_dir, "test_target.pt"))
 
-    print("Data processed and saved in", processed_dir)
+    print(f"Data processed and saved in {processed_dir}")
 
 
-def load_data():
-    """Load processed dataset and return PyTorch TensorDataset"""
+def load_data() -> tuple[torch.utils.data.TensorDataset, torch.utils.data.TensorDataset]:
+    """Load processed dataset and return PyTorch TensorDatasets.
+
+    Returns:
+        Tuple with train and test TensorDataset instances.
+    """
     train_images = torch.load("data/processed/train_images.pt")
     train_target = torch.load("data/processed/train_target.pt")
     test_images = torch.load("data/processed/test_images.pt")
