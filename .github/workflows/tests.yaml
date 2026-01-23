@@ -11,6 +11,8 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    env:
+      GCP_SERVICE_ACCOUNT_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
     strategy:
       fail-fast: false
       matrix:
@@ -24,23 +26,23 @@ jobs:
         fetch-depth: 2
 
     - name: Authenticate to GCP
-      if: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY != '' }}
+      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
       uses: google-github-actions/auth@v2
       with:
-        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+        credentials_json: ${{ env.GCP_SERVICE_ACCOUNT_KEY }}
 
     - uses: iterative/setup-dvc@v1
 
     - name: Confirm GCP secret present
-      if: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY != '' }}
+      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
       run: echo "GCP_SERVICE_ACCOUNT_KEY present, running dvc pull."
 
     - name: Get data
-      if: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY != '' }}
+      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY != '' }}
       run: dvc pull
 
     - name: Skip DVC pull (missing secret)
-      if: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY == '' }}
+      if: ${{ env.GCP_SERVICE_ACCOUNT_KEY == '' }}
       run: echo "Skipping dvc pull because GCP_SERVICE_ACCOUNT_KEY is not set."
 
     - name: Setup Python
