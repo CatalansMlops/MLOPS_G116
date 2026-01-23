@@ -29,3 +29,11 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements_dev.txt
           pip list
+
+      - name: ruff linter
+        run: |
+          ruff check .
+
+      - name: ruff formatter
+        run: |
+          ruff format . --check
