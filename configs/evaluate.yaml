@@ -1,3 +1,3 @@
 defaults:
-  - model: simple
+  - model: resnet18
   - evaluation: eval_default

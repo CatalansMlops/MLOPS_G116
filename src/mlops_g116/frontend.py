@@ -1,4 +1,7 @@
+"""Streamlit frontend for image classification."""
+
 import os
+from typing import Any
 
 import pandas as pd
 import requests
@@ -7,8 +10,12 @@ from google.cloud import run_v2
 
 
 @st.cache_resource
-def get_backend_url():
-    """Get the URL of the backend service."""
+def get_backend_url() -> str:
+    """Get the URL of the backend service.
+
+    Returns:
+        Cloud Run service URL if found, otherwise BACKEND environment value.
+    """
     parent = "projects/dtumlops-484509/locations/europe-west1"
     client = run_v2.ServicesClient()
     services = client.list_services(parent=parent)
@@ -17,12 +24,19 @@ def get_backend_url():
             print(service.uri)
             return service.uri
 
-    # Fallback to local environment variable if not found
     return os.environ.get("BACKEND", "http://127.0.0.1:8000")
 
 
-def classify_image(image, backend):
-    """Send the image to the backend for classification."""
+def classify_image(image: bytes, backend: str) -> dict[str, Any] | None:
+    """Send the image to the backend for classification.
+
+    Args:
+        image: Raw image bytes.
+        backend: Base URL of the backend service.
+
+    Returns:
+        Parsed JSON response or None if the request failed.
+    """
     predict_url = f"{backend}/classify/"
     response = requests.post(predict_url, files={"file": image}, timeout=10)
     if response.status_code == 200:
@@ -46,25 +60,19 @@ def main() -> None:
         result = classify_image(image, backend=backend)
 
         if result is not None:
-            # The backend now gives us exactly what we need
             predictions = result["predictions"]
 
-            # Display Image
             st.image(image, caption="Uploaded Image")
 
-            # Display Text Prediction (The first one is the best one)
             best_class = predictions[0]["class"]
             best_score = predictions[0]["score"]
             st.write(f"**Prediction:** {best_class} ({best_score:.2%})")
 
-            # Create DataFrame directly from the clean list
             df = pd.DataFrame(predictions)
 
-            # Rename columns to match Streamlit expects
             df.columns = ["Class", "Probability"]
             df.set_index("Class", inplace=True)
 
-            # Plot
             st.bar_chart(df, y="Probability")
         else:
             st.write("Failed to get prediction")
