@@ -9,7 +9,7 @@ from torchvision import transforms
 # Local
 # from src.mlops_g116.model import TumorDetectionModelSimple
 # Docker
-from mlops_g116.model import TumorDetectionModelSimple
+from src.mlops_g116.model import ResNet18
 
 # Constants
 MODEL_CHECKPOINT = "models/model.pth"
@@ -25,7 +25,7 @@ async def lifespan(app: FastAPI):
     labels = ["glioma", "meningioma", "notumor", "pituitary"]
 
     # 2. Load Model (CPU only, as requested)
-    model = TumorDetectionModelSimple()
+    model = ResNet18()
 
     # Load weights ensuring they map to CPU
     state_dict = torch.load(MODEL_CHECKPOINT, map_location=torch.device("cpu"))
