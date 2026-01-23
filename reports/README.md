@@ -309,7 +309,9 @@ Our total coverage is 58% (619 misses out of 1479 statements). The low overall n
 >
 > Answer:
 
---- question 12 fill here ---
+*We configured experiments with Hydra and the `configs/` tree. `main.py`, `train.py`, `evaluate.py`, and
+`visualize.py` use `@hydra.main` and load `config.yaml`, which composes `model/`, `optimizer/`, and `training/` and
+uses `instantiate` targets. `evaluate.yaml` and `visualize.yaml` redirect to `evaluation/` and `visualization/` while reusing the same model/data components. We override params from the CLI (e.g., `python src/mlops_g116/train.py optimizer.lr=1e-3 training.batch_size=32`) and Hydra stores outputs for reproducibility. We also keep `sweep.yaml` for W&B sweeps. Typer and the debugger (default.json) are only for small utilities.*
 
 ### Question 13
 
@@ -324,7 +326,8 @@ Our total coverage is 58% (619 misses out of 1479 statements). The low overall n
 >
 > Answer:
 
---- question 13 fill here ---
+*Reproducibility relied on Hydra, logging, and consistent runtime environments. We set seeds
+(`torch.manual_seed`) in training/evaluation runs and stored full configs through Hydra outputs, so each run keeps an exact copy of hyperparameters and component choices. We log metrics and artifacts to W&B and locally via Loguru (plus Hydra’s run directory), including confusion matrices, t‑SNE plots, and model checkpoints like `model.pth`. Outputs and profiler traces are kept in the GCS bucket, giving a durable record of each experiment; we also used TensorBoard and Snakeviz to capture performance profiles, and were automatically displayed just by running the python scripts, and by configuring ports. For environment reproducibility we used a Dev Container so developers run in a consistent Python 3.12 image, and multiple Dockerfiles for specific tasks (main/train/evaluate/visualize, backend/frontend). We kept variants for local vs cloud runs (CPU, local, cloud), including containers that read data from local processed files, via DVC pulls, or directly from GCS using service‑account credentials. The main container is the reference for hyperparameter optimization and W&B sweeps (`sweep.yaml`), and we can rerun any configuration by pointing to the same config and artifact versions. Together, seeded training, logged configs/artifacts, and containerized environments made experiments repeatable across machines and cloud runs.*
 
 ### Question 14
 
@@ -341,7 +344,12 @@ Our total coverage is 58% (619 misses out of 1479 statements). The low overall n
 >
 > Answer:
 
---- question 14 fill here ---
+> *We used W&B as the main experiment tracker and artifact registry, and complemented it with profiling/logging tools across training, evaluation, and visualization. For profiling we used the PyTorch profiler to emit trace files, TensorBoard to inspect operator timelines and GPU/CPU utilization, and Snakeviz for cProfile outputs; these are saved under Hydra run folders and uploaded to the outputs bucket for later inspection. For logging we relied on Hydra run directories, Loguru logs, and W&B. In W&B we tracked train/val/test metrics such as loss, accuracy, precision, recall, and F1, logged per‑epoch curves, and stored evaluation artifacts like confusion matrices and t‑SNE embeddings. These signals guided model selection across manual runs (local or Vertex AI) and automated sweeps via `sweep.yaml`, where we varied learning rate, optimizer, model backbone, batch size, and epochs. We also logged and versioned `model.pth`, plus run artifacts (configs, metrics JSON, profiler traces) so the best configuration can be reproduced exactly. Runs are organized by job type (train/evaluate/visualize), and W&B artifacts/collections separate model and evaluation outputs to keep lineage clear. The `registry_download.py` utility pulls a specific registered model/alias from the W&B
+registry, tying deployment to a versioned artifact and ensuring traceability from API predictions back to the training run. Examples below show training statistics, an evaluation confusion matrix, and the W&B artifact view for model lineage.
+
+![training_statistics](figures/training_statistics.png)
+![evaluation_confusion_matrix](figures/evaluation_confusion_matrix.png)
+![artifact_screenshot](figures/artifact_wandb_screenshot.jpeg)
 
 ### Question 15
 
@@ -356,7 +364,16 @@ Our total coverage is 58% (619 misses out of 1479 statements). The low overall n
 >
 > Answer:
 
---- question 15 fill here ---
+> *We used Docker to standardize experiments and deployments. We maintain multiple images in `dockerfiles/`: a main image for the end‑to‑end pipeline (train+eval+visualize), plus specialized backend/frontend images for Cloud Run and local training/evaluation variants, each with entrypoint scripts. For reproducible local work we also use a Dev Container that mirrors the same Python environment. In the cloud we build/push images via `configs/cloudbuild.yaml` (Cloud Build), or locally and push to Artifact Registry. Example local run:
+`docker run --rm --env-file .env -v $(pwd)/data:/app/data -v $(pwd)/outputs:/app/outputs main:latest`
+We store secrets in `.env` (e.g., `WANDB_API_KEY`) and, when needed, mount a service‑account JSON and set
+`GOOGLE_APPLICATION_CREDENTIALS` so containers can access GCS/DVC or Vertex AI. We also run Vertex AI jobs using
+`configs/vertex/*.yaml` for CPU/GPU training and sweeps. Docker gives consistent environments across laptops and cloud.
+
+Link to Dockerfile:
+```
+https://github.com/CatalansMlops/MLOPS_G116/blob/main/dockerfiles/main.dockerfile
+```*
 
 ### Question 16
 
