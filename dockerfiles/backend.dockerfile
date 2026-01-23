@@ -21,5 +21,4 @@ COPY models/model.pth models/model.pth
 # 6. Environment & Run
 # Cloud run
 #ENV PORT=8000
-CMD uvicorn src.mlops_g116.backend:app --host 0.0.0.0 --port $PORT --src-dir src
-
+CMD uvicorn src.mlops_g116.backend:app --host 0.0.0.0 --port $PORT --app-dir src

@@ -148,7 +148,13 @@ Group 116
 >
 > Answer:
 
---- question 3 fill here ---
+Yes. We used a few open-source packages beyond the core course stack: Streamlit to build a lightweight web frontend for
+interactive image upload and prediction display; Locust to load test the FastAPI service and quantify throughput under
+concurrency; Loguru for simpler structured logging across training/evaluation scripts; Snakeviz to visualize profiling
+outputs during performance checks; python-dotenv to load local environment variables for W&B and registry settings; and
+the Google Cloud Python SDKs (google-cloud-storage and google-cloud-run) to read data from GCS and discover the Cloud
+Run backend URL from the frontend. These tools helped us deliver a usable UI, validate performance, and streamline
+cloud integration.
 
 ## Coding environment
 
