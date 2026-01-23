@@ -7,8 +7,8 @@ from types import SimpleNamespace
 
 import pytest
 import torch
-from torch import nn
 from omegaconf import OmegaConf
+from torch import nn
 
 import mlops_g116.train_boilerplate as train_boilerplate
 
@@ -67,9 +67,7 @@ def test_evaluate_model_returns_perfect_metrics() -> None:
     assert metrics["f1"] == pytest.approx(1.0)
 
 
-def test_train_rewrites_target_and_saves_artifacts(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_train_rewrites_target_and_saves_artifacts(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Ensure train rewrites model target, sets lr, and saves outputs."""
     output_dir = tmp_path / "outputs" / "run1"
     output_dir.mkdir(parents=True, exist_ok=True)

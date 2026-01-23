@@ -9,12 +9,13 @@ import webbrowser
 from pathlib import Path
 
 import hydra
-from loguru import logger
 import matplotlib.pyplot as plt
-from omegaconf import DictConfig, OmegaConf
-from sklearn.metrics import RocCurveDisplay, accuracy_score, f1_score, precision_score, recall_score
 import torch
 import wandb
+from loguru import logger
+from omegaconf import DictConfig, OmegaConf
+from sklearn.metrics import RocCurveDisplay, accuracy_score, f1_score, precision_score, recall_score
+
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:
@@ -22,21 +23,17 @@ except ModuleNotFoundError:
 
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
+
 from mlops_g116.data import load_data
 
 # Select the best available device:
 # - CUDA if an NVIDIA GPU is available
 # - MPS for Apple Silicon
 # - CPU otherwise
-DEVICE = torch.device(
-    "cuda" if torch.cuda.is_available()
-    else "mps" if torch.backends.mps.is_available()
-    else "cpu"
-)
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = REPO_ROOT / "configs"
-
 
 
 def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
@@ -46,6 +43,7 @@ def _pick_available_port(preferred_port: int, max_tries: int = 10) -> int:
             if sock.connect_ex(("127.0.0.1", port)) != 0:
                 return port
     return preferred_port
+
 
 def _is_port_open(port: int) -> bool:
     """Check whether a local TCP port is accepting connections.
@@ -58,6 +56,7 @@ def _is_port_open(port: int) -> bool:
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         return sock.connect_ex(("127.0.0.1", port)) == 0
+
 
 def _launch_tensorboard(output_dir: Path, preferred_port: int, open_browser: bool) -> None:
     """Start TensorBoard for the run directory if available.
@@ -104,10 +103,11 @@ def _launch_snakeviz(profile_path: Path, preferred_port: int) -> None:
     cmd = [sys.executable, "-m", "snakeviz", "-p", str(port), str(profile_path)]
     subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     logger.info(f"Snakeviz: http://127.0.0.1:{port}/snakeviz/")
-    
+
+
 @hydra.main(config_path=str(CONFIG_DIR), config_name="config.yaml", version_base=None)
 def train(config) -> None:
-    '''
+    """
     Train a neural network on the MNIST dataset and save the trained model
     together with training statistics.
 
@@ -119,7 +119,7 @@ def train(config) -> None:
             Returns:
                     None: The function saves the trained model weights to disk
                           and stores training loss and accuracy plots.
-    '''
+    """
     hparams = config.hyperparameters
     dotenv_available = load_dotenv is not None
     if dotenv_available:
@@ -187,9 +187,7 @@ def train(config) -> None:
     if hasattr(model, "fc1"):
         logger.info(f"Model output classes: {model.fc1.out_features}")
     # Wrap dataset into a DataLoader to iterate in mini-batches
-    train_dataloader = torch.utils.data.DataLoader(
-        train_set, batch_size=hparams.batch_size
-    )
+    train_dataloader = torch.utils.data.DataLoader(train_set, batch_size=hparams.batch_size)
 
     # Standard loss function for multi-class classification
     loss_fn = torch.nn.CrossEntropyLoss()
@@ -233,12 +231,7 @@ def train(config) -> None:
 
                 statistics["train_loss"].append(loss.item())
 
-                accuracy = (
-                    (y_pred.argmax(dim=1) == target)
-                    .float()
-                    .mean()
-                    .item()
-                )
+                accuracy = (y_pred.argmax(dim=1) == target).float().mean().item()
                 epoch_loss += loss.item()
                 epoch_acc += accuracy
                 num_batches += 1
@@ -377,9 +370,11 @@ def train(config) -> None:
     if wandb_enabled:
         wandb.finish()
 
+
 def main() -> None:
     """Run the Hydra training entrypoint."""
     train()
+
 
 if __name__ == "__main__":
     main()

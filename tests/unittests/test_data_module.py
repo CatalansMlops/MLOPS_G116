@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
 import torch
 from PIL import Image
-import pytest
 
 from mlops_g116.data import IMG_SIZE, load_data, normalize, process_folder
 

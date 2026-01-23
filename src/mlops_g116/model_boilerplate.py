@@ -1,7 +1,7 @@
-import torch
-from torch import nn
-import torchvision.models as models
 import pytorch_lightning as pl
+import torch
+import torchvision.models as models
+from torch import nn
 
 
 class BaseLightningClassifier(pl.LightningModule):

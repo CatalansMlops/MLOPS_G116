@@ -4,15 +4,16 @@ import sys
 from pathlib import Path
 
 import hydra
+import pytorch_lightning as pl
+import torch
+import wandb
 from hydra.core.hydra_config import HydraConfig
 from hydra.utils import instantiate
 from loguru import logger
 from omegaconf import DictConfig, OmegaConf
-import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-import torch
-import wandb
+
 try:
     from dotenv import load_dotenv
 except ModuleNotFoundError:

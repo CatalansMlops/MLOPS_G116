@@ -1,22 +1,27 @@
 import os
-from PIL import Image
+from io import BytesIO
+
 import torch
-from torchvision import transforms
 import typer
 from google.cloud import storage
-from io import BytesIO
+from PIL import Image
+from torchvision import transforms
 
 IMG_SIZE = 224  # Image size (IMG_SIZE x IMG_SIZE)
 
 # Transformations
-transform = transforms.Compose([
-    transforms.Resize((IMG_SIZE, IMG_SIZE)),
-    transforms.ToTensor(),
-])
+transform = transforms.Compose(
+    [
+        transforms.Resize((IMG_SIZE, IMG_SIZE)),
+        transforms.ToTensor(),
+    ]
+)
+
 
 def normalize(images: torch.Tensor) -> torch.Tensor:
     """Normalizes images: mean 0, std 1"""
     return (images - images.mean()) / images.std()
+
 
 def process_folder_from_bucket(bucket, prefix: str):
     """Load all images from a GCS folder (with subfolders for classes)"""
@@ -26,11 +31,9 @@ def process_folder_from_bucket(bucket, prefix: str):
     blobs = list(bucket.list_blobs(prefix=prefix))
 
     # Extract class folder names
-    class_names = sorted({
-        blob.name.split("/")[3]
-        for blob in blobs
-        if blob.name.lower().endswith(("jpg", "jpeg", "png"))
-    })
+    class_names = sorted(
+        {blob.name.split("/")[3] for blob in blobs if blob.name.lower().endswith(("jpg", "jpeg", "png"))}
+    )
 
     class_to_label = {name: i for i, name in enumerate(class_names)}
 
@@ -52,6 +55,7 @@ def process_folder_from_bucket(bucket, prefix: str):
 
     return images, labels
 
+
 def preprocess(
     bucket_name: str = "mlops116",
     raw_prefix: str = "data/raw/brain_dataset",
@@ -68,19 +72,20 @@ def preprocess(
     test_prefix = f"{raw_prefix}/Testing"
 
     print("Processing training data from bucket...")
-    X_train, y_train = process_folder_from_bucket(bucket, train_prefix)
-    print(f"Training data: {X_train.shape[0]} images")
+    x_train, y_train = process_folder_from_bucket(bucket, train_prefix)
+    print(f"Training data: {x_train.shape[0]} images")
 
     print("Processing test data from bucket...")
-    X_test, y_test = process_folder_from_bucket(bucket, test_prefix)
-    print(f"Test data: {X_test.shape[0]} images")
+    x_test, y_test = process_folder_from_bucket(bucket, test_prefix)
+    print(f"Test data: {x_test.shape[0]} images")
 
-    torch.save(X_train, os.path.join(processed_dir, "train_images.pt"))
+    torch.save(x_train, os.path.join(processed_dir, "train_images.pt"))
     torch.save(y_train, os.path.join(processed_dir, "train_target.pt"))
-    torch.save(X_test, os.path.join(processed_dir, "test_images.pt"))
+    torch.save(x_test, os.path.join(processed_dir, "test_images.pt"))
     torch.save(y_test, os.path.join(processed_dir, "test_target.pt"))
 
     print("Data processed and saved in", processed_dir)
+
 
 def load_data():
     """Load processed dataset and return PyTorch TensorDataset"""
@@ -93,6 +98,7 @@ def load_data():
     test_set = torch.utils.data.TensorDataset(test_images, test_target)
 
     return train_set, test_set
+
 
 if __name__ == "__main__":
     typer.run(preprocess)

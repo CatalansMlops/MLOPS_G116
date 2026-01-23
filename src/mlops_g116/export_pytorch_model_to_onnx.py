@@ -11,10 +11,10 @@
 # # 3. Export using the STABLE API
 # print("Exporting model to ONNX...")
 # torch.onnx.export(
-#     model, 
-#     dummy_input, 
+#     model,
+#     dummy_input,
 #     "resnet18.onnx",
-#     input_names=["input"], 
+#     input_names=["input"],
 #     output_names=["output"],
 #     # Optional: Allow the batch size (dimension 0) to change
 #     dynamic_axes={"input": {0: "batch_size"}, "output": {0: "batch_size"}}
@@ -22,6 +22,7 @@
 # print("Model exported successfully as 'resnet18.onnx'")
 
 import onnx
+
 model = onnx.load("resnet18.onnx")
 onnx.checker.check_model(model)
 print(onnx.helper.printable_graph(model.graph))

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import torch
 import pytest
+import torch
 
 from mlops_g116.model import DenseNet121, ResNet18, TumorDetectionModelSimple
 
