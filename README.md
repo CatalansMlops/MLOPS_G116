@@ -43,10 +43,12 @@ The directory structure of the project looks like this:
 │   └── raw
 |       └── brain_dataset     # Brain Tumor MRI Dataset
 |           └── Training
-|           └── Testing           
+|           └── Testing
 ├── dockerfiles/              # Dockerfiles
 │   ├── api.Dockerfile
 │   └── train.Dockerfile
+|   └── frontend.Dockerfile
+|   └── backend.Dockerfile
 ├── docs/                     # Documentation
 │   ├── mkdocs.yml
 │   └── source/
